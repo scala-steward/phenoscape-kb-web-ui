@@ -19,7 +19,7 @@ object Model {
 
   }
 
-  case class Taxon(iri: String, label: String, common_name: Option[String], extinct: Boolean, rank: Option[Term])
+  case class Taxon(iri: String, label: String, commonName: Option[String], extinct: Boolean, rank: Option[Term])
 
   object Taxon {
 

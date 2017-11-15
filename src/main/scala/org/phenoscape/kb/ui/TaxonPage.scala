@@ -1,12 +1,15 @@
 package org.phenoscape.kb.ui
 
 import org.phenoscape.kb.ui.Model.IRI
+import org.phenoscape.kb.ui.Model.Term
+import org.phenoscape.kb.ui.Model.Taxon
 import org.phenoscape.kb.ui.Views.taxonName
 import org.phenoscape.kb.ui.Vocab._
 
 import outwatch.dom.VNode
 import outwatch.redux.Component
 import outwatch.redux.Store
+import rxscalajs.Observable
 
 object TaxonPage extends Component {
 
@@ -32,19 +35,22 @@ object TaxonPage extends Component {
 
     val obsTaxon = store.flatMap(s => KBAPI.taxon(s.taxonIRI))
     val obsClassificationData = store.flatMap(s => KBAPI.classification(s.taxonIRI, IRI(VTO)))
+    def taxonTermToView(term: Term) = a(
+      href := s"#/taxon/${Vocab.compact(IRI(term.iri)).id}",
+      child <-- KBAPI.taxon(IRI(term.iri)).map(Views.taxonName))
 
     div(
       h2(
         span(cls := "badge", "Taxon"), " ",
         span(child <-- obsTaxon.map(taxonName)),
-        span(hidden <-- obsTaxon.map(_.common_name.isEmpty), " (", span(child <-- obsTaxon.map(_.common_name.getOrElse(""))), ")"),
+        span(hidden := true, hidden <-- obsTaxon.map(_.commonName.isEmpty), " (", span(child <-- obsTaxon.map(_.commonName.getOrElse(""))), ")"),
         small(
           " ",
           a(href <-- store.map(_.taxonIRI.id), target := "_blank", cls := "link-no-color",
             child <-- store.map(s => Vocab.compact(s.taxonIRI).id)))),
       div(
         cls := "panel panel-default top-buffer",
-        div(cls := "panel-body", child <-- obsClassificationData.map(Views.classification))))
+        div(cls := "panel-body", child <-- obsClassificationData.map(Views.classification(_, taxonTermToView)))))
   }
 
 }
