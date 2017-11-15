@@ -1,10 +1,7 @@
 package org.phenoscape.kb.ui
 
-import outwatch.redux.Component
 import outwatch.dom._
-import org.phenoscape.kb.ui.App.KBRouter
-import org.phenoscape.kb.ui.Model.Curie
-import org.phenoscape.kb.ui.App.KBRouter.TaxonURL
+import outwatch.redux.Component
 
 object Home extends Component {
 

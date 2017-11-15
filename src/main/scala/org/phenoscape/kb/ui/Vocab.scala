@@ -1,8 +1,9 @@
 package org.phenoscape.kb.ui
 
+import java.util.regex.Matcher
+
 import Model.Curie
 import Model.IRI
-import java.util.regex.Matcher
 
 object Vocab {
 

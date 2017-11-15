@@ -1,11 +1,12 @@
 package org.phenoscape.kb.ui
 
-import outwatch.dom.VNode
-import org.phenoscape.kb.ui.Model.Taxon
 import org.phenoscape.kb.ui.Model.Classification
+import org.phenoscape.kb.ui.Model.Taxon
 import org.phenoscape.kb.ui.Vocab._
+
 import outwatch.dom._
 import outwatch.dom.Attributes.title
+import outwatch.dom.VNode
 import rxscalajs.Observable
 
 object Views {

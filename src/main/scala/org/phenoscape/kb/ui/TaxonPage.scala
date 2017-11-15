@@ -1,15 +1,12 @@
 package org.phenoscape.kb.ui
 
-import org.phenoscape.kb.ui.App.KBRouter
 import org.phenoscape.kb.ui.Model.IRI
-import org.phenoscape.kb.ui.Model.Taxon
 import org.phenoscape.kb.ui.Views.taxonName
+import org.phenoscape.kb.ui.Vocab._
+
 import outwatch.dom.VNode
 import outwatch.redux.Component
 import outwatch.redux.Store
-import rxscalajs.Observable
-import outwatch.Sink
-import org.phenoscape.kb.ui.Vocab._
 
 object TaxonPage extends Component {
 

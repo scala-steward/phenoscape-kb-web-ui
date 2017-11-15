@@ -2,13 +2,11 @@ package org.phenoscape.kb.ui
 
 import scala.scalajs.js.JSApp
 
-import org.phenoscape.kb.ui.Model.IRI
-
+import Model.Curie
 import outwatch.dom._
 import outwatch.router.BaseUrl
 import outwatch.router.Router
 import rxscalajs.Observable
-import Model.Curie
 
 object App extends JSApp {
 

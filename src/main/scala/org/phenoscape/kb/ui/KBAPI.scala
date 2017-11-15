@@ -1,17 +1,16 @@
 package org.phenoscape.kb.ui
 
-import rxscalajs.Observable
+import scala.scalajs.js.URIUtils.encodeURIComponent
+
+import org.phenoscape.kb.ui.Model.Classification
 import org.phenoscape.kb.ui.Model.IRI
 import org.phenoscape.kb.ui.Model.Taxon
-import org.phenoscape.kb.ui.Model.Classification
-import outwatch.http.Http
-import rxscalajs.dom.Response
 
-import java.net.URLEncoder
 import io.circe._
-import io.circe.generic.auto._
 import io.circe.parser._
-import io.circe.syntax._
+import outwatch.http.Http
+import rxscalajs.Observable
+import rxscalajs.dom.Response
 
 object KBAPI {
 
@@ -30,7 +29,7 @@ object KBAPI {
   //    Http.get(Observable.of(s"$api/term/classification?iri=${enc(iri.id)}&definedBy=${enc(definedBy.id)}")).map(res => decode[Classification](res.body)).collect { case Right(value) => value }
   //  }
 
-  private def enc(value: String): String = value //FIXME
+  private def enc(value: String): String = encodeURIComponent(value)
 
   private def get[T](uri: String)(implicit evidence: Decoder[T]): Observable[T] = toCaseClass[T](Http.get(Observable.of(uri)))
 
