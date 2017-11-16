@@ -19,6 +19,8 @@ object App extends JSApp {
     sealed trait Page
     object HomePage extends Page
     case class TaxonURL(id: String) extends Page
+    case class EntityURL(id: String) extends Page
+    case class GeneSimilarityURL(id: String) extends Page
 
     val baseUrl: BaseUrl = BaseUrl.until_# + "#"
 
@@ -29,7 +31,9 @@ object App extends JSApp {
 
       builder.rules(
         "/home".const(HomePage) ~> Home(),
-        ("/taxon" / string(".+")).caseClass[TaxonURL] ~> { case TaxonURL(id) => TaxonPage(TaxonPage.State(Vocab.expand(Curie(id)))) })
+        ("/taxon" / string(".+")).caseClass[TaxonURL] ~> { case TaxonURL(id) => TaxonPage(TaxonPage.State(Vocab.expand(Curie(id)))) },
+        ("/entity" / string(".+")).caseClass[EntityURL] ~> { case EntityURL(id) => EntityPage(EntityPage.State(Vocab.expand(Curie(id)))) },
+        ("/similarity/gene" / string(".+")).caseClass[GeneSimilarityURL] ~> { case GeneSimilarityURL(id) => GeneTaxonSimilarityPage(GeneTaxonSimilarityPage.State(Vocab.expand(Curie(id)), None)) })
         .notFound(Redirect(HomePage, replace = true))
     }
   }

@@ -14,11 +14,16 @@ object Util {
   /**
    * Map a CSS class handler to a usable attribute value
    */
-  def observableCSS(handler: Handler[(String, Boolean)]): Observable[String] = handler.scan(Set.empty[String]) { (classes, action) =>
+  def observableCSS(handler: Observable[(String, Boolean)]): Observable[String] = handler.scan(Set.empty[String]) { (classes, action) =>
     action match {
       case (cls, true)  => classes + cls
       case (cls, false) => classes - cls
     }
   }.map(_.mkString(" "))
+
+  def sequence[T](optObs: Option[Observable[T]]): Observable[Option[T]] = optObs match {
+    case Some(obs) => obs.map(Option(_))
+    case None      => Observable.of(None)
+  }
 
 }

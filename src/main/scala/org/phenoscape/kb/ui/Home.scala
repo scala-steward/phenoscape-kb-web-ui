@@ -70,7 +70,7 @@ object Home extends Component {
             p("An anatomical ontology puts phenotypic data into a rich anatomical and developmental context."),
             p(i(
               "Find ",
-              a(href := "#/entity/http://purl.obolibrary.org/obo/UBERON_0002513?tab=taxa&taxatab=phenotypes", "taxa with phenotypic data"),
+              a(href := "#/entity/UBERON:0002513", "taxa with phenotypic data"),
               " for any type of ", b("endochondral bone"), ". Or ",
               a(href := "#/entity/http://purl.obolibrary.org/obo/UBERON_0002513?tab=genes&taxatab=phenotypes&genestab=phenotypes", "genes from mouse, zebrafish, frog, or human with phenotypic effects"),
               "."))),
@@ -79,7 +79,7 @@ object Home extends Component {
             p("Using semantic similarity, the KB can perform fuzzy matching between suites of phenotypes, such as the various phenotypic effects of a gene vs. the profile of phenotypic variation within a given taxonomic group."),
             p(i(
               "View taxonomic variation ",
-              a(href := "#/gene/http://zfin.org/ZDB-GENE-070117-2105?tab=similarity", "similar to the phenotypic profile of the gene", b("apa")), "."))),
+              a(href := "#/similarity/gene/ZFIN:ZDB-GENE-070117-2105", "similar to the phenotypic profile of the gene ", b("apa")), "."))),
           examplePanel(
             "View presence and absence of any anatomical structure across taxa",
             p("Using the OntoTrace reasoning framework, the KB infers presence of absence of anatomical structure from both direct and indirect statements."),

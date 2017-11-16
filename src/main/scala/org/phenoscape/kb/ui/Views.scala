@@ -13,7 +13,7 @@ import rxscalajs.Observable
 object Views {
 
   def taxonName(taxon: Taxon): VNode = {
-    val isGenusOrSpecies = taxon.rank.map(rank => GenusOrSpecies(rank.iri)).getOrElse(false)
+    val isGenusOrSpecies = taxon.rank.map(rank => GenusOrSpecies(rank.iri.id)).getOrElse(false)
     var classes = List("taxon-name")
     if (taxon.extinct) classes = "extinct" :: classes
     val genusSpecies = if (isGenusOrSpecies) "genus-species" else ""

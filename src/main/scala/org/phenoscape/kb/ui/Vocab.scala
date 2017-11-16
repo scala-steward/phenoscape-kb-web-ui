@@ -11,11 +11,15 @@ object Vocab {
   val Species = "http://purl.obolibrary.org/obo/TAXRANK_0000006"
   val GenusOrSpecies = Set(Genus, Species)
   val VTO = "http://purl.obolibrary.org/obo/vto.owl"
+  val Uberon = "http://purl.obolibrary.org/obo/uberon.owl"
+  val TaxonSimilarityCorpus = "http://kb.phenoscape.org/sim/taxa"
+  val GeneSimilarityCorpus = "http://kb.phenoscape.org/sim/genes"
 
   private val Prefixes = Map(
     "VTO" -> "http://purl.obolibrary.org/obo/VTO_",
     "TAXRANK" -> "http://purl.obolibrary.org/obo/TAXRANK_",
-    "UBERON" -> "http://purl.obolibrary.org/obo/UBERON_")
+    "UBERON" -> "http://purl.obolibrary.org/obo/UBERON_",
+    "ZFIN" -> "http://zfin.org/")
 
   private val Expansions = Prefixes.map(_.swap)
 

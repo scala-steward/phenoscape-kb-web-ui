@@ -36,8 +36,8 @@ object TaxonPage extends Component {
     val obsTaxon = store.flatMap(s => KBAPI.taxon(s.taxonIRI))
     val obsClassificationData = store.flatMap(s => KBAPI.classification(s.taxonIRI, IRI(VTO)))
     def taxonTermToView(term: Term) = a(
-      href := s"#/taxon/${Vocab.compact(IRI(term.iri)).id}",
-      child <-- KBAPI.taxon(IRI(term.iri)).map(Views.taxonName))
+      href := s"#/taxon/${Vocab.compact(term.iri).id}",
+      child <-- KBAPI.taxon(term.iri).map(Views.taxonName))
 
     div(
       h2(
