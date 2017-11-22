@@ -1,6 +1,7 @@
 package org.phenoscape.kb.ui
 
 import io.circe._
+import io.circe.generic.auto._
 
 object Model {
 
@@ -52,6 +53,9 @@ object Model {
 
   final case class ResultList[T](results: List[T])
 
+  /**
+   * Match between two profiles.
+   */
   final case class SimilarityMatch(matchProfile: Term, medianScore: Double, expectScore: Double)
 
   object SimilarityMatch {
@@ -59,5 +63,19 @@ object Model {
     implicit val decoder: Decoder[SimilarityMatch] = Decoder.forProduct3("match_profile", "median_score", "expect_score")(SimilarityMatch.apply)
 
   }
+
+  final case class SimilaritySubsumerTerm(term: Term, ic: Double, disparity: Double)
+
+  final case class SimilarityAnnotationMatch(queryAnnotation: IRI, corpusAnnotation: IRI, bestSubsumer: SimilaritySubsumerTerm)
+
+  object SimilarityAnnotationMatch {
+
+    implicit val iriDecoder: Decoder[IRI] = Decoder.forProduct1("@id")(IRI.apply)
+
+    implicit val decoder: Decoder[SimilarityAnnotationMatch] = Decoder.forProduct3("query_annotation", "corpus_annotation", "best_subsumer")(SimilarityAnnotationMatch.apply)
+
+  }
+
+  final case class TaxonGroup(label: String, phylopic: IRI)
 
 }

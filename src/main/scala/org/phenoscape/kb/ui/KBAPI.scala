@@ -34,7 +34,20 @@ object KBAPI {
 
   def similarityProfileSize(iri: IRI): Observable[Int] = get[Total](s"$api/similarity/profile_size?iri=${enc(iri.id)}").map(_.total)
 
+  def bestMatches(queryProfile: IRI, queryGraph: IRI, corpusProfile: IRI, corpusGraph: IRI): Observable[ResultList[SimilarityAnnotationMatch]] = {
+    val params = Map(
+      "query_iri" -> queryProfile.id,
+      "query_graph" -> queryGraph.id,
+      "corpus_iri" -> corpusProfile.id,
+      "corpus_graph" -> corpusGraph.id)
+    get[ResultList[SimilarityAnnotationMatch]](s"$api/similarity/best_matches?${toQuery(params)}")
+  }
+
+  def similarityCorpusSize(corpusGraph: IRI): Observable[Int] = get[Total](s"$api/similarity/corpus_size?corpus_graph=${enc(corpusGraph.id)}").map(_.total)
+
   def classification(iri: IRI, definedBy: IRI): Observable[Classification] = get[Classification](s"$api/term/classification?iri=${enc(iri.id)}&definedBy=${enc(definedBy.id)}")
+
+  def taxonCommonGroup(taxon: IRI): Observable[TaxonGroup] = get[TaxonGroup](s"$api/taxon/group?iri=${enc(taxon.id)}")
 
   private def enc(value: String): String = encodeURIComponent(value)
 
@@ -43,8 +56,10 @@ object KBAPI {
   private def toCaseClass[T](response: Observable[Response])(implicit evidence: Decoder[T]): Observable[T] = response.map(res => {
     val decoded = decode[T](res.body)
     decoded match {
-      case Left(error) => println(error)
-      case _           => ()
+      case Left(error) =>
+        println(error)
+        println(s"Failed decoding JSON response: ${res.body.take(100)}...")
+      case _ => ()
     }
     decoded
   }).collect { case Right(value) => value }

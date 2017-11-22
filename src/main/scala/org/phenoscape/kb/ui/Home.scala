@@ -5,13 +5,9 @@ import outwatch.redux.Component
 
 object Home extends Component {
 
-  //object Action
-
   class State extends ComponentState {
 
-    def evolve = {
-      case _ => this
-    }
+    def evolve = { case _ => this }
 
   }
 

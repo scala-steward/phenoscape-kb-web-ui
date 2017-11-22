@@ -9,6 +9,7 @@ import outwatch.dom._
 import outwatch.dom.Attributes.title
 import outwatch.dom.VNode
 import rxscalajs.Observable
+import outwatch.Sink
 
 object Views {
 
@@ -31,6 +32,24 @@ object Views {
         cls := "classification-level",
         p(data.label, span(children <-- equivalents)),
         div(cls := "classification-level", ul(cls := "list-unstyled", children <-- subClasses))))
+  }
+
+  def pagination(currentPage: Observable[Int], newPage: Sink[Int], totalPages: Observable[Int]): VNode = {
+    val onFirstPage = currentPage.map(_ == 1)
+    val firstAndPreviousClasses = Util.observableCSS(onFirstPage.map("disabled" -> _))
+    val onLastPage = for {
+      current <- currentPage
+      last <- totalPages
+    } yield last == current
+    val nextAndLastClasses = Util.observableCSS(onLastPage.map("disabled" -> _))
+    nav(
+      ul(
+        cls := "pagination pagination-sm",
+        li(cls <-- firstAndPreviousClasses, a(role := "button", click(1) --> newPage, "First")),
+        li(cls <-- firstAndPreviousClasses, a(role := "button", click(currentPage.map(_ - 1)) --> newPage, "Previous")),
+        li(cls := "active", a(child <-- currentPage)),
+        li(cls <-- nextAndLastClasses, a(role := "button", click(currentPage.map(_ + 1)) --> newPage, "Next")),
+        li(cls <-- nextAndLastClasses, a(role := "button", click(totalPages) --> newPage, "Last"))))
   }
 
 }
