@@ -15,13 +15,37 @@ object KBAPI {
 
   //TODO pass accept header for JSON
 
-  val api: String = "http://kb.phenoscape.org/api"
+  //val api: String = "http://kb.phenoscape.org/api"
+  val api: String = "http://localhost:8082"
 
   def termLabel(iri: IRI): Observable[Term] = get[Term](s"$api/term/label?iri=${enc(iri.id)}")
 
   def taxon(iri: IRI): Observable[Taxon] = get[Taxon](s"$api/taxon?iri=${enc(iri.id)}")
 
   def gene(iri: IRI): Observable[Gene] = get[Gene](s"$api/gene?iri=${enc(iri.id)}")
+
+  def countTaxaWithPhenotype(entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean): Observable[Int] = {
+    val params = Map[String, Any](
+      "parts" -> parts,
+      "historical_homologs" -> historicalHomologs,
+      "serial_homologs" -> serialHomologs,
+      "total" -> true)
+      .add(entity.map(e => "entity" -> s"<${e.id}>"))
+      .add(quality.map(q => "quality" -> s"<${q.id}>"))
+      .add(inTaxon.map("in_taxon" -> _.id))
+    get[Total](s"$api/taxon/with_phenotype?${toQuery(params)}").map(_.total)
+  }
+
+  def facetTaxaWithPhenotype(facet: String, entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean): Observable[List[Facet]] = {
+    val params = Map[String, Any](
+      "parts" -> parts,
+      "historical_homologs" -> historicalHomologs,
+      "serial_homologs" -> serialHomologs)
+      .add(entity.map(e => "entity" -> e.id))
+      .add(quality.map(q => "quality" -> q.id))
+      .add(inTaxon.map("in_taxon" -> _.id))
+    get[ResultList[Facet]](s"$api/taxon/facet/phenotype/$facet?${toQuery(params)}").map(_.results)
+  }
 
   def similarityMatches(subject: IRI, corpusGraph: IRI, limit: Int, offset: Int): Observable[ResultList[SimilarityMatch]] = {
     val params = Map(
@@ -70,5 +94,14 @@ object KBAPI {
   }).toSeq.sorted.mkString("&")
 
   private final case class Total(total: Int)
+
+  private implicit class OptionMap[K, V](val self: Map[K, V]) extends AnyVal {
+
+    def add(optionalItem: Option[(K, V)]): Map[K, V] = optionalItem match {
+      case Some(item) => self + item
+      case None       => self
+    }
+
+  }
 
 }

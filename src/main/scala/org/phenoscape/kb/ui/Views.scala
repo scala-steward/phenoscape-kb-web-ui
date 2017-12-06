@@ -37,10 +37,7 @@ object Views {
   def pagination(currentPage: Observable[Int], newPage: Sink[Int], totalPages: Observable[Int]): VNode = {
     val onFirstPage = currentPage.map(_ == 1)
     val firstAndPreviousClasses = Util.observableCSS(onFirstPage.map("disabled" -> _))
-    val onLastPage = for {
-      current <- currentPage
-      last <- totalPages
-    } yield last == current
+    val onLastPage = currentPage.combineLatestWith(totalPages)(_ == _)
     val nextAndLastClasses = Util.observableCSS(onLastPage.map("disabled" -> _))
     nav(
       ul(

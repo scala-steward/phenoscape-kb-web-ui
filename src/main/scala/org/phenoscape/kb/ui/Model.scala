@@ -78,4 +78,6 @@ object Model {
 
   final case class TaxonGroup(label: String, phylopic: IRI)
 
+  final case class Facet(term: Term, count: Int)
+
 }

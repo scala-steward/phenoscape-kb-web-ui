@@ -28,9 +28,7 @@ object GeneTaxonSimilarityPage extends Component {
 
   }
 
-  def apply(initState: State): VNode = {
-    view(Store.create(Seq.empty, initState))
-  }
+  def apply(initState: State): VNode = view(Store.create(Seq.empty, initState))
 
   def view(store: Store[State, Action]): VNode = {
     val matchesPageSize = 20
@@ -39,8 +37,8 @@ object GeneTaxonSimilarityPage extends Component {
     val obsSubject = obsGeneIRI.flatMap(KBAPI.gene)
     val corpusSize = KBAPI.similarityCorpusSize(IRI(Vocab.TaxonSimilarityCorpus))
     val similarityMatches = for {
-      iri <- obsGeneIRI
-      page <- obsPage
+      (iri, page) <- obsGeneIRI.combineLatest(obsPage)
+      //page <- obsPage
       offset = (page - 1) * matchesPageSize
       simMatches <- KBAPI.similarityMatches(iri, IRI(Vocab.TaxonSimilarityCorpus), matchesPageSize, offset).map(_.results).startWith(Nil)
     } yield simMatches
@@ -51,8 +49,7 @@ object GeneTaxonSimilarityPage extends Component {
     val selectedMatchProfileSizeOpt = selectedMatch.flatMap(matchedOpt => Util.sequence(matchedOpt.map(matched => KBAPI.similarityProfileSize(matched.matchProfile.iri))))
     val selectedMatchAsTaxon = selectedMatch.flatMap(matchedOpt => Util.sequence(matchedOpt.map(matched => KBAPI.taxon(matched.matchProfile.iri))))
     val selectedMatchAnnotations = for {
-      geneIRI <- obsGeneIRI
-      matchedOpt <- selectedMatch
+      (geneIRI, matchedOpt) <- obsGeneIRI.combineLatest(selectedMatch)
       annotationsOpt <- Util.sequence(matchedOpt.map(matched =>
         KBAPI.bestMatches(geneIRI, IRI(Vocab.GeneSimilarityCorpus), matched.matchProfile.iri, IRI(Vocab.TaxonSimilarityCorpus)))).startWith(None)
     } yield annotationsOpt.map(_.results).toList.flatten

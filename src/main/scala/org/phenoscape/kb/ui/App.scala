@@ -21,6 +21,7 @@ object App extends JSApp {
     case class TaxonURL(id: String) extends Page
     case class EntityURL(id: String) extends Page
     case class GeneSimilarityURL(id: String) extends Page
+    object FacetURL extends Page
 
     val baseUrl: BaseUrl = BaseUrl.until_# + "#"
 
@@ -33,7 +34,8 @@ object App extends JSApp {
         "/home".const(HomePage) ~> Home(),
         ("/taxon" / string(".+")).caseClass[TaxonURL] ~> { case TaxonURL(id) => TaxonPage(TaxonPage.State(Vocab.expand(Curie(id)))) },
         ("/entity" / string(".+")).caseClass[EntityURL] ~> { case EntityURL(id) => EntityPage(EntityPage.State(Vocab.expand(Curie(id)))) },
-        ("/similarity/gene" / string(".+")).caseClass[GeneSimilarityURL] ~> { case GeneSimilarityURL(id) => GeneTaxonSimilarityPage(GeneTaxonSimilarityPage.State(Vocab.expand(Curie(id)), None)) })
+        ("/similarity/gene" / string(".+")).caseClass[GeneSimilarityURL] ~> { case GeneSimilarityURL(id) => GeneTaxonSimilarityPage(GeneTaxonSimilarityPage.State(Vocab.expand(Curie(id)), None)) },
+        "/facet".const(FacetURL) ~> FacetPage(FacetPage.State(FacetPage.TaxaTab, Nil, Nil, Nil)))
         .notFound(Redirect(HomePage, replace = true))
     }
   }

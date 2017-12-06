@@ -110,8 +110,8 @@ object Home extends Component {
               li(a(href := "#/annotate_text", "Annotate text"))),
             h3("Data API"),
             p(
-              "This website is built on our publicly accessible web service APIs. Service documentation and automatically generated code examples are available via ",
-              a(href := "http://docs.phenoscapekb.apiary.io/", "Apiary"), "."),
+              "This website is built on our publicly accessible web service APIs. Service documentation and automatically generated code examples are available ",
+              a(target := "_blank", href := "http://kb.phenoscape.org/apidocs/", "here"), "."),
             h3("Contribute data"),
             p(
               "Phenoscape welcomes community contributions. Get started by reviewing our ",
