@@ -24,6 +24,18 @@ object KBAPI {
 
   def gene(iri: IRI): Observable[Gene] = get[Gene](s"$api/gene?iri=${enc(iri.id)}")
 
+  def queryTaxaWithPhenotype(entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean): Observable[List[Term]] = {
+    val params = Map[String, Any](
+      "parts" -> parts,
+      "historical_homologs" -> historicalHomologs,
+      "serial_homologs" -> serialHomologs,
+      "limit" -> 20)
+      .add(entity.map(e => "entity" -> s"<${e.id}>"))
+      .add(quality.map(q => "quality" -> s"<${q.id}>"))
+      .add(inTaxon.map("in_taxon" -> _.id))
+    get[ResultList[Term]](s"$api/taxon/with_phenotype?${toQuery(params)}").map(_.results)
+  }
+
   def countTaxaWithPhenotype(entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean): Observable[Int] = {
     val params = Map[String, Any](
       "parts" -> parts,
@@ -37,6 +49,7 @@ object KBAPI {
   }
 
   def facetTaxaWithPhenotype(facet: String, entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean): Observable[List[Facet]] = {
+    //FIXME turn 'facet' into enum
     val params = Map[String, Any](
       "parts" -> parts,
       "historical_homologs" -> historicalHomologs,

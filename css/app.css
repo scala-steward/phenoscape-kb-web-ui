@@ -2,7 +2,7 @@
 
 #site_title { background-image: url(../img/phenoscape_logo.png); background-size: auto 150%; background-repeat: no-repeat;}
 
-#phenoscape_logo { height: 60px; }
+#phenoscape_logo { height: 100px; }
 
 blockquote.character { font-size: 14px; display: inline-block; }
 
@@ -49,3 +49,4 @@ div.classification-level div.classification-level {padding-left: 1.5em;}
 
 .facet-indent {width: 1.5em; display: inline-block;}
 .selected-facet {font-weight: bold; color: black;}
+/* .facet-controls .badge {float: right;} */

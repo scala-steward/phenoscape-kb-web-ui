@@ -38,7 +38,6 @@ object GeneTaxonSimilarityPage extends Component {
     val corpusSize = KBAPI.similarityCorpusSize(IRI(Vocab.TaxonSimilarityCorpus))
     val similarityMatches = for {
       (iri, page) <- obsGeneIRI.combineLatest(obsPage)
-      //page <- obsPage
       offset = (page - 1) * matchesPageSize
       simMatches <- KBAPI.similarityMatches(iri, IRI(Vocab.TaxonSimilarityCorpus), matchesPageSize, offset).map(_.results).startWith(Nil)
     } yield simMatches

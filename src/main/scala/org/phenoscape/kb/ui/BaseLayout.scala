@@ -14,7 +14,7 @@ object BaseLayout {
           cls := "col-xs-8",
           div(
             cls := "btn-toolbar",
-            h1(img(id := "phenoscape_logo", src := "img/phenoscape_logo.png"), a(href := "#/home", "Phenoscape Knowledgebase")),
+            h1(a(href := "#/home", alt := "Phenoscape Knowledgebase", img(id := "phenoscape_logo", src := "img/phenoscape_logo.png"))),
             div(
               cls := "btn-group",
               button(tpe := "button", cls := "btn btn-default btn-sm dropdown-toggle", data.toggle := "dropdown", Aria.expanded := false,
