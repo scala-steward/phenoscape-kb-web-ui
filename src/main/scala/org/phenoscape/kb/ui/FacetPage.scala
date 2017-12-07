@@ -6,11 +6,11 @@ import org.phenoscape.kb.ui.Model.Term
 
 import outwatch.Sink
 import outwatch.dom._
+import outwatch.dom.Attributes.style
 import outwatch.dom.VNode
 import outwatch.redux.Component
 import outwatch.redux.Store
 import rxscalajs.Observable
-import outwatch.dom.Attributes.style
 
 object FacetPage extends Component {
 
@@ -93,8 +93,6 @@ object FacetPage extends Component {
     val setEntityPath = store.sink.redirectMap(SetEntityPath(_))
     val setQualityPath = store.sink.redirectMap(SetQualityPath(_))
     val setTaxonPath = store.sink.redirectMap(SetTaxonPath(_))
-    val res = Util.observableCSS(store.map(_.selectedTab == PhenotypesTab).map("active" -> _))
-    //Util.observableCSS(toggles)
 
     div(
       cls := "row",
