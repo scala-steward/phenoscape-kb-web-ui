@@ -7,6 +7,7 @@ import org.phenoscape.kb.ui.Vocab._
 
 import outwatch.dom._
 import outwatch.dom.Attributes.title
+import outwatch.dom.Attributes.style
 import outwatch.dom.VNode
 import rxscalajs.Observable
 import outwatch.Sink
@@ -47,6 +48,56 @@ object Views {
         li(cls := "active", a(child <-- currentPage)),
         li(cls <-- nextAndLastClasses, a(role := "button", click(currentPage.map(_ + 1)) --> newPage, "Next")),
         li(cls <-- nextAndLastClasses, a(role := "button", click(totalPages) --> newPage, "Last"))))
+  }
+
+  def autocompleteField[T](search: String => Observable[List[T]], selection: Observable[Option[T]], show: T => String, makeSelection: Sink[Option[T]], placeholderText: Option[String]): VNode = {
+    val enteredText = createStringHandler()
+    val selectedIndex = createHandler[Int](0)
+
+    val currentMatches = (for {
+      text <- enteredText.filter(_.size > 2).debounceTime(300)
+      matches <- search(text)
+    } yield matches).merge(selection.map(_ => Nil))
+    val hideDropdown = currentMatches.map(_.isEmpty)
+
+    val selectedAsText = selection.map(_.map(show).getOrElse(""))
+    val keyHandler = createHandler[String]() //
+//    keyHandler.filter(_ == "down").combineLatestWith(selectedIndex) { (_, index) =>
+//      index + 1
+//    }
+    val currentIndex = selectedIndex.merge(hideDropdown.map(_ => 0), keyHandler.filter(_ == "down").combineLatestWith(selectedIndex) { (_, index) =>
+      index + 1
+    })
+    val shouldFocus = createBoolHandler(false) //
+    val ulDisplay = hideDropdown.map(if (_) "none" else "block")
+    val ulCSS = Util.observableCSS(Observable.of("autocomplete-menu" -> true, "dropdown-menu" -> true).merge(hideDropdown.map("live" -> !_)))
+    //keyHandler.map(project)
+
+    def listItem(item: T, index: Int): VNode = li(
+      click(Some(item)) --> makeSelection,
+      selected <-- currentIndex.map(_ == index),
+      focus(index) --> selectedIndex,
+      role := "option",
+      tabindex := 0,
+      a(show(item)))
+
+    // div bool classes: has-success has-feedback
+    div(
+      cls := "form-group",
+      style := "position: relative;",
+      input(
+        tpe := "text",
+        cls := "form-control",
+        inputString --> enteredText,
+        value <-- selectedAsText,
+        autocomplete := "off",
+        placeholder := placeholderText.getOrElse("")),
+      ul(
+        keydown.filter(_.keyCode == 38)("down") --> keyHandler,
+        cls <-- ulCSS,
+        role := "menu",
+        style := "position: absolute;",
+        children <-- currentMatches.map(_.zipWithIndex.map { case (item, i) => listItem(item, i) })))
   }
 
 }

@@ -15,14 +15,21 @@ object KBAPI {
 
   //TODO pass accept header for JSON
 
-  //val api: String = "http://kb.phenoscape.org/api"
-  val api: String = "http://localhost:8082"
+  val api: String = "http://kb.phenoscape.org/api"
+  //val api: String = "http://localhost:8082"
 
   def termLabel(iri: IRI): Observable[Term] = get[Term](s"$api/term/label?iri=${enc(iri.id)}")
 
   def taxon(iri: IRI): Observable[Taxon] = get[Taxon](s"$api/taxon?iri=${enc(iri.id)}")
 
   def gene(iri: IRI): Observable[Gene] = get[Gene](s"$api/gene?iri=${enc(iri.id)}")
+
+  def ontologyClassSearch(text: String, definedBy: Option[IRI], limit: Int): Observable[List[Term]] = {
+    val params = Map[String, Any](
+      "text" -> text,
+      "limit" -> limit).add(definedBy.map("definedBy" -> _.id))
+    get[ResultList[Term]](s"$api/term/search_classes?${toQuery(params)}").map(_.results)
+  }
 
   def queryTaxaWithPhenotype(entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean): Observable[List[Term]] = {
     val params = Map[String, Any](

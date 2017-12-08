@@ -2,6 +2,7 @@ package org.phenoscape.kb.ui
 
 import org.phenoscape.kb.ui.Model.IRI
 import org.phenoscape.kb.ui.Model.SimilarityMatch
+import org.phenoscape.kb.ui.Model.Term
 import org.phenoscape.kb.ui.Vocab._
 
 import outwatch.dom._
@@ -53,8 +54,11 @@ object GeneTaxonSimilarityPage extends Component {
         KBAPI.bestMatches(geneIRI, IRI(Vocab.GeneSimilarityCorpus), matched.matchProfile.iri, IRI(Vocab.TaxonSimilarityCorpus)))).startWith(None)
     } yield annotationsOpt.map(_.results).toList.flatten
 
+  //  val handler = createHandler[Option[Term]]()
+
     div(
       h2("Similar evolutionary variation"),
+     // Views.autocompleteField(KBAPI.ontologyClassSearch(_: String, Some(IRI(Vocab.VTO)), 20), handler, (term: Term) => term.label, handler, Some("type here")),
       p("These taxonomic groups vary in phenotypes that match most closely to the gene profile (collection of phenotypes) that result when the action of this gene is disrupted (e.g., knocked down)."),
       div(
         cls := "panel-body",
