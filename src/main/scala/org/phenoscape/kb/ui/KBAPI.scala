@@ -15,8 +15,8 @@ object KBAPI {
 
   //TODO pass accept header for JSON
 
-  val api: String = "http://kb.phenoscape.org/api"
-  //val api: String = "http://localhost:8082"
+  //val api: String = "http://kb.phenoscape.org/api"
+  val api: String = "http://localhost:8082"
 
   def termLabel(iri: IRI): Observable[Term] = get[Term](s"$api/term/label?iri=${enc(iri.id)}")
 

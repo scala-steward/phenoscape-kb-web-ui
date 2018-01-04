@@ -57,12 +57,15 @@ object FacetPage extends Component {
   def apply(initState: State): VNode = view(Store.create(Seq.empty, initState))
 
   def view(store: Store[State, Action]): VNode = {
-    val entity = store.map(_.selectedEntityPath.headOption).distinctUntilChanged
     val entityPath = store.map(_.selectedEntityPath).distinctUntilChanged
-    val quality = store.map(_.selectedQualityPath.headOption).distinctUntilChanged
+    val entity = entityPath.map(_.headOption).distinctUntilChanged
     val qualityPath = store.map(_.selectedQualityPath).distinctUntilChanged
-    val taxon = store.map(_.selectedTaxonPath.headOption).distinctUntilChanged
+    val quality = qualityPath.map(_.headOption).distinctUntilChanged
+    val entityTerm = entity.flatMap(e => Util.sequence(e.map(KBAPI.termLabel)))
+    val qualityTerm = quality.flatMap(q => Util.sequence(q.map(KBAPI.termLabel)))
     val taxonPath = store.map(_.selectedTaxonPath).distinctUntilChanged
+    val taxon = taxonPath.map(_.headOption).distinctUntilChanged
+    val taxonTerm = taxon.flatMap(t => Util.sequence(t.map(KBAPI.termLabel)))
     val activeTab = store.map(_.selectedTab).distinctUntilChanged
     val taxaWithPhenotype = taxon.combineLatestWith(entity, quality) { (t, e, q) =>
       KBAPI.queryTaxaWithPhenotype(e, q, t, false, false, false).startWith(Nil)
@@ -93,14 +96,28 @@ object FacetPage extends Component {
     val setEntityPath = store.sink.redirectMap(SetEntityPath(_))
     val setQualityPath = store.sink.redirectMap(SetQualityPath(_))
     val setTaxonPath = store.sink.redirectMap(SetTaxonPath(_))
+    val entitySearch = Views.autocompleteField(KBAPI.ontologyClassSearch(_: String, Some(IRI(Vocab.Uberon)), 20), entityTerm, (term: Term) => term.label, setEntityPath.redirectMap((ot: Option[Term]) => ot.map(_.iri).toList), Some("any anatomical entity"))
+    val qualitySearch = Views.autocompleteField(KBAPI.ontologyClassSearch(_: String, Some(IRI(Vocab.PATO)), 20), qualityTerm, (term: Term) => term.label, setQualityPath.redirectMap((ot: Option[Term]) => ot.map(_.iri).toList), Some("any phenotypic quality"))
+    val taxonSearch = Views.autocompleteField(KBAPI.ontologyClassSearch(_: String, Some(IRI(Vocab.VTO)), 20), taxonTerm, (term: Term) => term.label, setTaxonPath.redirectMap((ot: Option[Term]) => ot.map(_.iri).toList), Some("any taxonomic group"))
 
     div(
       cls := "row",
       div(
         cls := "col-sm-3",
-        facetControls("entity", entityPath, entityCountFn, entityFacetFn, setEntityPath),
-        facetControls("quality", qualityPath, qualityCountFn, qualityFacetFn, setQualityPath),
-        facetControls("taxon", taxonPath, taxonCountFn, taxonFacetFn, setTaxonPath)),
+        div(
+          cls := "panel panel-default facet-controls",
+          style := "margin-top: 1em;",
+          div(
+            cls := "panel-heading",
+            h4(cls := "panel-title", "Query")),
+          div(
+            cls := "panel-body",
+            entitySearch,
+            qualitySearch,
+            taxonSearch)),
+        facetControls("anatomical entity", entityPath, entityCountFn, entityFacetFn, setEntityPath),
+        facetControls("phenotypic quality", qualityPath, qualityCountFn, qualityFacetFn, setQualityPath),
+        facetControls("taxonomic group", taxonPath, taxonCountFn, taxonFacetFn, setTaxonPath)),
       div(
         cls := "col-sm-9",
         ul(

@@ -52,7 +52,7 @@ object Views {
 
   def autocompleteField[T](search: String => Observable[List[T]], selection: Observable[Option[T]], show: T => String, makeSelection: Sink[Option[T]], placeholderText: Option[String]): VNode = {
     val enteredText = createStringHandler()
-    val selectedIndex = createHandler[Int](0)
+   // val selectedIndex = createHandler[Int](0)
 
     val currentMatches = (for {
       text <- enteredText.filter(_.size > 2).debounceTime(300)
@@ -65,9 +65,9 @@ object Views {
 //    keyHandler.filter(_ == "down").combineLatestWith(selectedIndex) { (_, index) =>
 //      index + 1
 //    }
-    val currentIndex = selectedIndex.merge(hideDropdown.map(_ => 0), keyHandler.filter(_ == "down").combineLatestWith(selectedIndex) { (_, index) =>
-      index + 1
-    })
+//    val currentIndex = selectedIndex.merge(hideDropdown.map(_ => 0), keyHandler.filter(_ == "down").combineLatestWith(selectedIndex) { (_, index) =>
+//      index + 1
+//    })
     val shouldFocus = createBoolHandler(false) //
     val ulDisplay = hideDropdown.map(if (_) "none" else "block")
     val ulCSS = Util.observableCSS(Observable.of("autocomplete-menu" -> true, "dropdown-menu" -> true).merge(hideDropdown.map("live" -> !_)))
@@ -75,8 +75,8 @@ object Views {
 
     def listItem(item: T, index: Int): VNode = li(
       click(Some(item)) --> makeSelection,
-      selected <-- currentIndex.map(_ == index),
-      focus(index) --> selectedIndex,
+      //selected <-- currentIndex.map(_ == index),
+      //focus(index) --> selectedIndex,
       role := "option",
       tabindex := 0,
       a(show(item)))
