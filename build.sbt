@@ -12,6 +12,8 @@ scalacOptions ++= Seq("-deprecation", "-Ypartial-unification")
 
 requiresDOM in Test := true
 
+scalaJSUseMainModuleInitializer := true
+
 libraryDependencies ++= Seq(
   "io.github.outwatch"    %%% "outwatch"        % "0.10.2",
   "com.github.mariusmuja" %%% "outwatch-router" % "0.1.1-SNAPSHOT",
@@ -21,7 +23,6 @@ libraryDependencies ++= Seq(
   "io.circe"              %%% "circe-core"      % "0.8.0",
   "io.circe"              %%% "circe-generic"   % "0.8.0",
   "io.circe"              %%% "circe-parser"    % "0.8.0",
-//  "be.doeraene"           %%% "scalajs-jquery"  % "0.9.2",
   "org.scalatest"         %%% "scalatest"       % "3.0.3" % Test
 )
 
