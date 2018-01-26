@@ -51,7 +51,8 @@ object Home extends Component {
           examplePanel(
             "Search for taxa, anatomical structures, or genes",
             p("Go straight to an item of interest using the search box at the top right of every page."),
-            p(i("Try entering ", b("Cypriniformes"), ", ", b("femur"), ", or ", b("bmp1a"), "."))),
+            p(i("Try entering ", b("Cypriniformes"), ", ", b("femur"), ", or ", b("bmp1a"), ".")),
+            p("Or browse all taxon phenotype annotations using ", a(href := "#/facet", "faceted browsing"), ".")),
           examplePanel(
             "Find phenotypes annotated to a taxon",
             p("View published phenotypes for a given taxon, aggregated from multiple comparative studies."),
