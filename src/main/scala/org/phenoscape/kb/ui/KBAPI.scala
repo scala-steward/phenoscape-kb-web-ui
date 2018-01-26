@@ -67,6 +67,76 @@ object KBAPI {
     get[ResultList[Facet]](s"$api/taxon/facet/phenotype/$facet?${toQuery(params)}").map(_.results)
   }
 
+  def queryTaxonAnnotations(entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean): Observable[List[TaxonAnnotation]] = {
+    val params = Map[String, Any](
+      "parts" -> parts,
+      "historical_homologs" -> historicalHomologs,
+      "serial_homologs" -> serialHomologs,
+      "limit" -> 20)
+      .add(entity.map(e => "entity" -> e.id))
+      .add(quality.map(q => "quality" -> q.id))
+      .add(inTaxon.map("in_taxon" -> _.id))
+    get[ResultList[TaxonAnnotation]](s"$api/taxon/annotations?${toQuery(params)}").map(_.results)
+  }
+
+  def countTaxonAnnotations(entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean): Observable[Int] = {
+    val params = Map[String, Any](
+      "parts" -> parts,
+      "historical_homologs" -> historicalHomologs,
+      "serial_homologs" -> serialHomologs,
+      "total" -> true)
+      .add(entity.map(e => "entity" -> e.id))
+      .add(quality.map(q => "quality" -> q.id))
+      .add(inTaxon.map("in_taxon" -> _.id))
+    get[Total](s"$api/taxon/annotations?${toQuery(params)}").map(_.total)
+  }
+
+  def facetTaxonAnnotations(facet: String, entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean): Observable[List[Facet]] = {
+    val params = Map[String, Any](
+      "parts" -> parts,
+      "historical_homologs" -> historicalHomologs,
+      "serial_homologs" -> serialHomologs)
+      .add(entity.map(e => "entity" -> e.id))
+      .add(quality.map(q => "quality" -> q.id))
+      .add(inTaxon.map("in_taxon" -> _.id))
+    get[ResultList[Facet]](s"$api/taxon/facet/annotations/$facet?${toQuery(params)}").map(_.results)
+  }
+
+  def queryTaxonPhenotypes(entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean): Observable[List[Term]] = {
+    val params = Map[String, Any](
+      "parts" -> parts,
+      "historical_homologs" -> historicalHomologs,
+      "serial_homologs" -> serialHomologs,
+      "limit" -> 20)
+      .add(entity.map(e => "entity" -> e.id))
+      .add(quality.map(q => "quality" -> q.id))
+      .add(inTaxon.map("in_taxon" -> _.id))
+    get[ResultList[Term]](s"$api/phenotype/query?${toQuery(params)}").map(_.results)
+  }
+
+  def countTaxonPhenotypes(entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean): Observable[Int] = {
+    val params = Map[String, Any](
+      "parts" -> parts,
+      "historical_homologs" -> historicalHomologs,
+      "serial_homologs" -> serialHomologs,
+      "total" -> true)
+      .add(entity.map(e => "entity" -> e.id))
+      .add(quality.map(q => "quality" -> q.id))
+      .add(inTaxon.map("in_taxon" -> _.id))
+    get[Total](s"$api/phenotype/query?${toQuery(params)}").map(_.total)
+  }
+
+  def facetTaxonPhenotypes(facet: String, entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean): Observable[List[Facet]] = {
+    val params = Map[String, Any](
+      "parts" -> parts,
+      "historical_homologs" -> historicalHomologs,
+      "serial_homologs" -> serialHomologs)
+      .add(entity.map(e => "entity" -> e.id))
+      .add(quality.map(q => "quality" -> q.id))
+      .add(inTaxon.map("in_taxon" -> _.id))
+    get[ResultList[Facet]](s"$api/phenotype/facet/$facet?${toQuery(params)}").map(_.results)
+  }
+
   def similarityMatches(subject: IRI, corpusGraph: IRI, limit: Int, offset: Int): Observable[ResultList[SimilarityMatch]] = {
     val params = Map(
       "iri" -> subject.id,

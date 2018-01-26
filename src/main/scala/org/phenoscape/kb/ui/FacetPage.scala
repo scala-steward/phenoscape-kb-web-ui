@@ -3,6 +3,7 @@ package org.phenoscape.kb.ui
 import org.phenoscape.kb.ui.Model.Facet
 import org.phenoscape.kb.ui.Model.IRI
 import org.phenoscape.kb.ui.Model.Term
+import org.phenoscape.kb.ui.Model.TaxonAnnotation
 
 import outwatch.Sink
 import outwatch.dom._
@@ -67,31 +68,60 @@ object FacetPage extends Component {
     val taxon = taxonPath.map(_.headOption).distinctUntilChanged
     val taxonTerm = taxon.flatMap(t => Util.sequence(t.map(KBAPI.termLabel)))
     val activeTab = store.map(_.selectedTab).distinctUntilChanged
-    val taxaWithPhenotype = taxon.combineLatestWith(entity, quality) { (t, e, q) =>
-      KBAPI.queryTaxaWithPhenotype(e, q, t, false, false, false).startWith(Nil)
-    }.flatten
+    val tableTitle = activeTab.map {
+      case PhenotypesTab   => "Phenotypes"
+      case AnnotationsTab  => "Taxon annotations"
+      case TaxaTab         => "Taxa with phenotype"
+      case PublicationsTab => "Publications"
+    }
+    val tableWithData = activeTab.combineLatestWith(entity, quality, taxon)(dataTable)
     val entityCountFn = activeTab.combineLatestWith(quality, taxon) { (tab, q, t) =>
       tab match {
-        case PhenotypesTab   => KBAPI.countTaxaWithPhenotype(_: Option[IRI], q, t, false, false, false) //FIXME
-        case AnnotationsTab  => KBAPI.countTaxaWithPhenotype(_: Option[IRI], q, t, false, false, false) //FIXME
+        case PhenotypesTab   => KBAPI.countTaxonPhenotypes(_: Option[IRI], q, t, false, false, false)
         case TaxaTab         => KBAPI.countTaxaWithPhenotype(_: Option[IRI], q, t, false, false, false)
+        case AnnotationsTab  => KBAPI.countTaxonAnnotations(_: Option[IRI], q, t, false, false, false)
         case PublicationsTab => KBAPI.countTaxaWithPhenotype(_: Option[IRI], q, t, false, false, false) //FIXME
       }
     }
-    val entityFacetFn = quality.combineLatestWith(taxon) { (q, t) =>
-      KBAPI.facetTaxaWithPhenotype("entity", _: Option[IRI], q, t, false, false, false)
+    val entityFacetFn = activeTab.combineLatestWith(quality, taxon) { (tab, q, t) =>
+      tab match {
+        case PhenotypesTab   => KBAPI.facetTaxonPhenotypes("entity", _: Option[IRI], q, t, false, false, false)
+        case TaxaTab         => KBAPI.facetTaxaWithPhenotype("entity", _: Option[IRI], q, t, false, false, false)
+        case AnnotationsTab  => KBAPI.facetTaxonAnnotations("entity", _: Option[IRI], q, t, false, false, false)
+        case PublicationsTab => KBAPI.facetTaxaWithPhenotype("entity", _: Option[IRI], q, t, false, false, false)
+      }
     }
-    val qualityCountFn = entity.combineLatestWith(taxon) { (e, t) =>
-      KBAPI.countTaxaWithPhenotype(e, _: Option[IRI], t, false, false, false)
+    val qualityCountFn = activeTab.combineLatestWith(entity, taxon) { (tab, e, t) =>
+      tab match {
+        case PhenotypesTab   => KBAPI.countTaxonPhenotypes(e, _: Option[IRI], t, false, false, false)
+        case TaxaTab         => KBAPI.countTaxaWithPhenotype(e, _: Option[IRI], t, false, false, false)
+        case AnnotationsTab  => KBAPI.countTaxonAnnotations(e, _: Option[IRI], t, false, false, false)
+        case PublicationsTab => KBAPI.countTaxaWithPhenotype(e, _: Option[IRI], t, false, false, false)
+      }
     }
-    val qualityFacetFn = entity.combineLatestWith(taxon) { (e, t) =>
-      KBAPI.facetTaxaWithPhenotype("quality", e, _: Option[IRI], t, false, false, false)
+    val qualityFacetFn = activeTab.combineLatestWith(entity, taxon) { (tab, e, t) =>
+      tab match {
+        case PhenotypesTab   => KBAPI.facetTaxonPhenotypes("quality", e, _: Option[IRI], t, false, false, false)
+        case TaxaTab         => KBAPI.facetTaxaWithPhenotype("quality", e, _: Option[IRI], t, false, false, false)
+        case AnnotationsTab  => KBAPI.facetTaxonAnnotations("quality", e, _: Option[IRI], t, false, false, false)
+        case PublicationsTab => KBAPI.facetTaxaWithPhenotype("quality", e, _: Option[IRI], t, false, false, false)
+      }
     }
-    val taxonCountFn = entity.combineLatestWith(quality) { (e, q) =>
-      KBAPI.countTaxaWithPhenotype(e, q, _: Option[IRI], false, false, false)
+    val taxonCountFn = activeTab.combineLatestWith(entity, quality) { (tab, e, q) =>
+      tab match {
+        case PhenotypesTab   => KBAPI.countTaxonPhenotypes(e, q, _: Option[IRI], false, false, false)
+        case TaxaTab         => KBAPI.countTaxaWithPhenotype(e, q, _: Option[IRI], false, false, false)
+        case AnnotationsTab  => KBAPI.countTaxonAnnotations(e, q, _: Option[IRI], false, false, false)
+        case PublicationsTab => KBAPI.countTaxaWithPhenotype(e, q, _: Option[IRI], false, false, false)
+      }
     }
-    val taxonFacetFn = entity.combineLatestWith(quality) { (e, q) =>
-      KBAPI.facetTaxaWithPhenotype("taxon", e, q, _: Option[IRI], false, false, false)
+    val taxonFacetFn = activeTab.combineLatestWith(entity, quality) { (tab, e, q) =>
+      tab match {
+        case PhenotypesTab   => KBAPI.facetTaxonPhenotypes("taxon", e, q, _: Option[IRI], false, false, false)
+        case TaxaTab         => KBAPI.facetTaxaWithPhenotype("taxon", e, q, _: Option[IRI], false, false, false)
+        case AnnotationsTab  => KBAPI.facetTaxonAnnotations("taxon", e, q, _: Option[IRI], false, false, false)
+        case PublicationsTab => KBAPI.facetTaxaWithPhenotype("taxon", e, q, _: Option[IRI], false, false, false)
+      }
     }
     val setEntityPath = store.sink.redirectMap(SetEntityPath(_))
     val setQualityPath = store.sink.redirectMap(SetQualityPath(_))
@@ -135,16 +165,49 @@ object FacetPage extends Component {
           style := "margin-top: 1em;",
           div(
             cls := "panel-heading",
-            h4(cls := "panel-title", "Taxa with phenotype")),
+            h4(cls := "panel-title", child <-- tableTitle)),
           div(
             cls := "panel-body"),
-          table(
-            cls := "table table-condensed table-striped",
-            thead(
-              tr(
-                th("Group"),
-                th("Taxon"))),
-            tbody(children <-- taxaWithPhenotype.map(_.map(taxonRow)))))))
+          child <-- tableWithData)))
+  }
+
+  private def dataTable(tab: FacetTab, entity: Option[Model.IRI], quality: Option[Model.IRI], taxon: Option[Model.IRI]): VNode = {
+    val (header, rows) = tab match {
+      case PhenotypesTab =>
+        val data = KBAPI.queryTaxonPhenotypes(entity, quality, taxon, false, false, false).startWith(Nil)
+        (
+          thead(tr(th("Phenotype"))),
+          tbody(children <-- data.map(_.map(phenotypeRow))))
+      case TaxaTab =>
+        val data = KBAPI.queryTaxaWithPhenotype(entity, quality, taxon, false, false, false).startWith(Nil)
+        (
+          thead(tr(
+            th("Group"),
+            th("Taxon"))),
+          tbody(children <-- data.map(_.map(taxonRow))))
+      case AnnotationsTab =>
+        val data = KBAPI.queryTaxonAnnotations(entity, quality, taxon, false, false, false).startWith(Nil)
+        (
+          thead(tr(
+            th("Group"),
+            th("Taxon"),
+            th("Phenotype"),
+            th("Source"))),
+          tbody(children <-- data.map(_.map(taxonAnnotationRow))))
+      case PublicationsTab => //FIXME
+        val data = KBAPI.queryTaxaWithPhenotype(entity, quality, taxon, false, false, false).startWith(Nil)
+        (
+          thead(tr(
+            th("Group"),
+            th("Taxon"))),
+          tbody(children <-- data.map(_.map(taxonRow))))
+    }
+    table(
+      cls := "table table-condensed table-striped", header, rows)
+  }
+
+  private def phenotypeRow(term: Term): VNode = {
+    tr(td(term.label))
   }
 
   private def taxonRow(term: Term): VNode = {
@@ -157,6 +220,20 @@ object FacetPage extends Component {
     tr(
       td(child <-- group),
       td(child <-- taxonName.startWith(term.label)))
+  }
+
+  private def taxonAnnotationRow(annotation: TaxonAnnotation): VNode = {
+    val taxonName = KBAPI.taxon(annotation.taxon.iri).map(Views.taxonName)
+    val group = KBAPI.taxonCommonGroup(annotation.taxon.iri).map { grp =>
+      val thumbnail = Util.taxonThumbnailIRI(grp.phylopic).id
+      span(Popover.simplePopover, cls := "common-taxon-group", data.toggle := "popover", data.trigger := "hover", data.placement := "right", data.content := grp.label,
+        img(src := thumbnail))
+    } //FIXME repeated code with similarity page
+    tr(
+      td(child <-- group),
+      td(child <-- taxonName.startWith(annotation.taxon.label)),
+      td(annotation.phenotype.label),
+      td(annotation.source.label))
   }
 
   private def facetControls(title: String, focusItemPath: Observable[List[IRI]], countFunc: Observable[CountFn], facetFunc: Observable[FacetFn], newFocus: Sink[List[IRI]]): VNode = {

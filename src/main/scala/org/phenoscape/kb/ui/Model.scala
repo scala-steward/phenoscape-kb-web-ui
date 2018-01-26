@@ -43,6 +43,14 @@ object Model {
 
   }
 
+  final case class TaxonAnnotation(taxon: Term, phenotype: Term, source: Term)
+
+  object TaxonAnnotation {
+
+    implicit val decoder: Decoder[TaxonAnnotation] = Decoder.forProduct3("taxon", "phenotype", "study")(TaxonAnnotation.apply)
+
+  }
+
   final case class Classification(iri: IRI, label: String, subClassOf: List[Term], equivalentTo: List[Term], superClassOf: List[Term])
 
   object Classification {
