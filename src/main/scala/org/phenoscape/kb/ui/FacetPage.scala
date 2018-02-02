@@ -80,7 +80,7 @@ object FacetPage extends Component {
         case PhenotypesTab   => KBAPI.countTaxonPhenotypes(_: Option[IRI], q, t, false, false, false)
         case TaxaTab         => KBAPI.countTaxaWithPhenotype(_: Option[IRI], q, t, false, false, false)
         case AnnotationsTab  => KBAPI.countTaxonAnnotations(_: Option[IRI], q, t, false, false, false)
-        case PublicationsTab => KBAPI.countTaxaWithPhenotype(_: Option[IRI], q, t, false, false, false) //FIXME
+        case PublicationsTab => KBAPI.countStudiesWithPhenotype(_: Option[IRI], q, t, false, false, false)
       }
     }
     val entityFacetFn = activeTab.combineLatestWith(quality, taxon) { (tab, q, t) =>
@@ -88,7 +88,7 @@ object FacetPage extends Component {
         case PhenotypesTab   => KBAPI.facetTaxonPhenotypes("entity", _: Option[IRI], q, t, false, false, false)
         case TaxaTab         => KBAPI.facetTaxaWithPhenotype("entity", _: Option[IRI], q, t, false, false, false)
         case AnnotationsTab  => KBAPI.facetTaxonAnnotations("entity", _: Option[IRI], q, t, false, false, false)
-        case PublicationsTab => KBAPI.facetTaxaWithPhenotype("entity", _: Option[IRI], q, t, false, false, false)
+        case PublicationsTab => KBAPI.facetStudiesWithPhenotype("entity", _: Option[IRI], q, t, false, false, false)
       }
     }
     val qualityCountFn = activeTab.combineLatestWith(entity, taxon) { (tab, e, t) =>
@@ -96,7 +96,7 @@ object FacetPage extends Component {
         case PhenotypesTab   => KBAPI.countTaxonPhenotypes(e, _: Option[IRI], t, false, false, false)
         case TaxaTab         => KBAPI.countTaxaWithPhenotype(e, _: Option[IRI], t, false, false, false)
         case AnnotationsTab  => KBAPI.countTaxonAnnotations(e, _: Option[IRI], t, false, false, false)
-        case PublicationsTab => KBAPI.countTaxaWithPhenotype(e, _: Option[IRI], t, false, false, false)
+        case PublicationsTab => KBAPI.countStudiesWithPhenotype(e, _: Option[IRI], t, false, false, false)
       }
     }
     val qualityFacetFn = activeTab.combineLatestWith(entity, taxon) { (tab, e, t) =>
@@ -104,7 +104,7 @@ object FacetPage extends Component {
         case PhenotypesTab   => KBAPI.facetTaxonPhenotypes("quality", e, _: Option[IRI], t, false, false, false)
         case TaxaTab         => KBAPI.facetTaxaWithPhenotype("quality", e, _: Option[IRI], t, false, false, false)
         case AnnotationsTab  => KBAPI.facetTaxonAnnotations("quality", e, _: Option[IRI], t, false, false, false)
-        case PublicationsTab => KBAPI.facetTaxaWithPhenotype("quality", e, _: Option[IRI], t, false, false, false)
+        case PublicationsTab => KBAPI.facetStudiesWithPhenotype("quality", e, _: Option[IRI], t, false, false, false)
       }
     }
     val taxonCountFn = activeTab.combineLatestWith(entity, quality) { (tab, e, q) =>
@@ -112,7 +112,7 @@ object FacetPage extends Component {
         case PhenotypesTab   => KBAPI.countTaxonPhenotypes(e, q, _: Option[IRI], false, false, false)
         case TaxaTab         => KBAPI.countTaxaWithPhenotype(e, q, _: Option[IRI], false, false, false)
         case AnnotationsTab  => KBAPI.countTaxonAnnotations(e, q, _: Option[IRI], false, false, false)
-        case PublicationsTab => KBAPI.countTaxaWithPhenotype(e, q, _: Option[IRI], false, false, false)
+        case PublicationsTab => KBAPI.countStudiesWithPhenotype(e, q, _: Option[IRI], false, false, false)
       }
     }
     val taxonFacetFn = activeTab.combineLatestWith(entity, quality) { (tab, e, q) =>
@@ -120,7 +120,7 @@ object FacetPage extends Component {
         case PhenotypesTab   => KBAPI.facetTaxonPhenotypes("taxon", e, q, _: Option[IRI], false, false, false)
         case TaxaTab         => KBAPI.facetTaxaWithPhenotype("taxon", e, q, _: Option[IRI], false, false, false)
         case AnnotationsTab  => KBAPI.facetTaxonAnnotations("taxon", e, q, _: Option[IRI], false, false, false)
-        case PublicationsTab => KBAPI.facetTaxaWithPhenotype("taxon", e, q, _: Option[IRI], false, false, false)
+        case PublicationsTab => KBAPI.facetStudiesWithPhenotype("taxon", e, q, _: Option[IRI], false, false, false)
       }
     }
     val setEntityPath = store.sink.redirectMap(SetEntityPath(_))
@@ -177,7 +177,7 @@ object FacetPage extends Component {
         val data = KBAPI.queryTaxonPhenotypes(entity, quality, taxon, false, false, false).startWith(Nil)
         (
           thead(tr(th("Phenotype"))),
-          tbody(children <-- data.map(_.map(phenotypeRow))))
+          tbody(children <-- data.map(_.map(singleTermRow))))
       case TaxaTab =>
         val data = KBAPI.queryTaxaWithPhenotype(entity, quality, taxon, false, false, false).startWith(Nil)
         (
@@ -195,18 +195,17 @@ object FacetPage extends Component {
             th("Source"))),
           tbody(children <-- data.map(_.map(taxonAnnotationRow))))
       case PublicationsTab => //FIXME
-        val data = KBAPI.queryTaxaWithPhenotype(entity, quality, taxon, false, false, false).startWith(Nil)
+        val data = KBAPI.queryStudiesWithPhenotype(entity, quality, taxon, false, false, false).startWith(Nil)
         (
           thead(tr(
-            th("Group"),
-            th("Taxon"))),
-          tbody(children <-- data.map(_.map(taxonRow))))
+            th("Study"))),
+          tbody(children <-- data.map(_.map(singleTermRow))))
     }
     table(
       cls := "table table-condensed table-striped", header, rows)
   }
 
-  private def phenotypeRow(term: Term): VNode = {
+  private def singleTermRow(term: Term): VNode = {
     tr(td(term.label))
   }
 

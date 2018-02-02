@@ -137,6 +137,42 @@ object KBAPI {
     get[ResultList[Facet]](s"$api/phenotype/facet/$facet?${toQuery(params)}").map(_.results)
   }
 
+  def queryStudiesWithPhenotype(entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean): Observable[List[Term]] = {
+    val params = Map[String, Any](
+      "parts" -> parts,
+      "historical_homologs" -> historicalHomologs,
+      "serial_homologs" -> serialHomologs,
+      "limit" -> 20)
+      .add(entity.map(e => "entity" -> s"<${e.id}>"))
+      .add(quality.map(q => "quality" -> s"<${q.id}>"))
+      .add(inTaxon.map("in_taxon" -> _.id))
+    get[ResultList[Term]](s"$api/study/query?${toQuery(params)}").map(_.results)
+  }
+
+  def countStudiesWithPhenotype(entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean): Observable[Int] = {
+    val params = Map[String, Any](
+      "parts" -> parts,
+      "historical_homologs" -> historicalHomologs,
+      "serial_homologs" -> serialHomologs,
+      "total" -> true)
+      .add(entity.map(e => "entity" -> s"<${e.id}>"))
+      .add(quality.map(q => "quality" -> s"<${q.id}>"))
+      .add(inTaxon.map("in_taxon" -> _.id))
+    get[Total](s"$api/study/query?${toQuery(params)}").map(_.total)
+  }
+
+  def facetStudiesWithPhenotype(facet: String, entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean): Observable[List[Facet]] = {
+    //FIXME turn 'facet' into enum
+    val params = Map[String, Any](
+      "parts" -> parts,
+      "historical_homologs" -> historicalHomologs,
+      "serial_homologs" -> serialHomologs)
+      .add(entity.map(e => "entity" -> e.id))
+      .add(quality.map(q => "quality" -> q.id))
+      .add(inTaxon.map("in_taxon" -> _.id))
+    get[ResultList[Facet]](s"$api/study/facet/$facet?${toQuery(params)}").map(_.results)
+  }
+
   def similarityMatches(subject: IRI, corpusGraph: IRI, limit: Int, offset: Int): Observable[ResultList[SimilarityMatch]] = {
     val params = Map(
       "iri" -> subject.id,
