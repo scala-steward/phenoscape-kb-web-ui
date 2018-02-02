@@ -143,8 +143,8 @@ object KBAPI {
       "historical_homologs" -> historicalHomologs,
       "serial_homologs" -> serialHomologs,
       "limit" -> 20)
-      .add(entity.map(e => "entity" -> s"<${e.id}>"))
-      .add(quality.map(q => "quality" -> s"<${q.id}>"))
+      .add(entity.map(e => "entity" -> e.id))
+      .add(quality.map(q => "quality" -> q.id))
       .add(inTaxon.map("in_taxon" -> _.id))
     get[ResultList[Term]](s"$api/study/query?${toQuery(params)}").map(_.results)
   }
@@ -155,8 +155,8 @@ object KBAPI {
       "historical_homologs" -> historicalHomologs,
       "serial_homologs" -> serialHomologs,
       "total" -> true)
-      .add(entity.map(e => "entity" -> s"<${e.id}>"))
-      .add(quality.map(q => "quality" -> s"<${q.id}>"))
+      .add(entity.map(e => "entity" -> e.id))
+      .add(quality.map(q => "quality" -> q.id))
       .add(inTaxon.map("in_taxon" -> _.id))
     get[Total](s"$api/study/query?${toQuery(params)}").map(_.total)
   }
