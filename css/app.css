@@ -49,7 +49,10 @@ div.classification-level div.classification-level {padding-left: 1.5em;}
 
 .facet-indent {width: 1.5em; display: inline-block;}
 .selected-facet {font-weight: bold; color: black;}
-/* .facet-controls .badge {float: right;} */
+/* .facet-line { display: inline-flex; justify-content: space-between;} */
+/* .facet-line .badge {align-self: flex-end;} */
+.facet-controls .badge {float: right;}
+.facet-line {clear: both;}
 
 .autocomplete-menu {display: none;}
 .autocomplete-menu.live {display: block;}

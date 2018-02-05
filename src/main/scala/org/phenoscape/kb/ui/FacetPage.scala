@@ -133,7 +133,7 @@ object FacetPage extends Component {
     div(
       cls := "row",
       div(
-        cls := "col-sm-3",
+        cls := "col-sm-4",
         div(
           cls := "panel panel-default facet-controls",
           style := "margin-top: 1em;",
@@ -149,7 +149,7 @@ object FacetPage extends Component {
         facetControls("phenotypic quality", qualityPath, qualityCountFn, qualityFacetFn, setQualityPath),
         facetControls("taxonomic group", taxonPath, taxonCountFn, taxonFacetFn, setTaxonPath)),
       div(
-        cls := "col-sm-9",
+        cls := "col-sm-8",
         ul(
           cls := "nav nav-tabs",
           li(role := "presentation", cls <-- Util.observableCSS(activeTab.map(t => "active" -> (t == PhenotypesTab))),
@@ -261,7 +261,7 @@ object FacetPage extends Component {
         h4(cls := "panel-title", title.capitalize)),
       div(
         cls := "panel-body",
-        div(a(role := "button", cls <-- anyCSSClass, click(Nil) --> newFocus, s"Any $title"), " ", span(cls := "badge", child <-- anyCount)),
+        div(cls := "facet-line", a(role := "button", cls <-- anyCSSClass, click(Nil) --> newFocus, s"Any $title"), " ", span(cls := "badge", child <-- anyCount)),
         div(children <-- facetPathElements),
         div(children <-- facetChildElements)))
   }
@@ -272,13 +272,13 @@ object FacetPage extends Component {
     val count = countFunc.flatMap(_(Some(currentTerm)).map(_.toString).startWith(""))
     val indent = span(termPath.map(_ => span(cls := "facet-indent")): _*)
     val cssClass = if (selected) "selected-facet" else ""
-    div(indent, a(role := "button", cls := cssClass, click(termPath) --> newFocus, child <-- termLabelObs), " ", span(cls := "badge", child <-- count))
+    div(cls := "facet-line", indent, a(role := "button", cls := cssClass, click(termPath) --> newFocus, child <-- termLabelObs), " ", span(cls := "badge", child <-- count))
   }
 
   private def facetChildLink(facetItem: Facet, termPath: List[IRI], newFocus: Sink[List[IRI]]): VNode = {
     val newPath = facetItem.term.iri :: termPath
     val indent = span(newPath.map(_ => span(cls := "facet-indent")): _*)
-    div(indent, a(role := "button", click(newPath) --> newFocus, facetItem.term.label), " ", span(cls := "badge", facetItem.count.toString))
+    div(cls := "facet-line", indent, a(role := "button", click(newPath) --> newFocus, facetItem.term.label), " ", span(cls := "badge", facetItem.count.toString))
   }
 
 }
