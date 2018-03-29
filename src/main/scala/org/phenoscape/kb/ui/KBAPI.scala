@@ -31,12 +31,13 @@ object KBAPI {
     get[ResultList[Term]](s"$api/term/search_classes?${toQuery(params)}").map(_.results)
   }
 
-  def queryTaxaWithPhenotype(entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean): Observable[List[Term]] = {
+  def queryTaxaWithPhenotype(entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean, limit: Int, offset: Int): Observable[List[Term]] = {
     val params = Map[String, Any](
       "parts" -> parts,
       "historical_homologs" -> historicalHomologs,
       "serial_homologs" -> serialHomologs,
-      "limit" -> 20)
+      "limit" -> limit,
+      "offset" -> offset)
       .add(entity.map(e => "entity" -> s"<${e.id}>"))
       .add(quality.map(q => "quality" -> s"<${q.id}>"))
       .add(inTaxon.map("in_taxon" -> _.id))
@@ -67,12 +68,13 @@ object KBAPI {
     get[ResultList[Facet]](s"$api/taxon/facet/phenotype/$facet?${toQuery(params)}").map(_.results)
   }
 
-  def queryTaxonAnnotations(entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean): Observable[List[TaxonAnnotation]] = {
+  def queryTaxonAnnotations(entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean, limit: Int, offset: Int): Observable[List[TaxonAnnotation]] = {
     val params = Map[String, Any](
       "parts" -> parts,
       "historical_homologs" -> historicalHomologs,
       "serial_homologs" -> serialHomologs,
-      "limit" -> 20)
+      "limit" -> limit,
+      "offset" -> offset)
       .add(entity.map(e => "entity" -> e.id))
       .add(quality.map(q => "quality" -> q.id))
       .add(inTaxon.map("in_taxon" -> _.id))
@@ -102,12 +104,13 @@ object KBAPI {
     get[ResultList[Facet]](s"$api/taxon/facet/annotations/$facet?${toQuery(params)}").map(_.results)
   }
 
-  def queryTaxonPhenotypes(entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean): Observable[List[Term]] = {
+  def queryTaxonPhenotypes(entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean, limit: Int, offset: Int): Observable[List[Term]] = {
     val params = Map[String, Any](
       "parts" -> parts,
       "historical_homologs" -> historicalHomologs,
       "serial_homologs" -> serialHomologs,
-      "limit" -> 20)
+      "limit" -> limit,
+      "offset" -> offset)
       .add(entity.map(e => "entity" -> e.id))
       .add(quality.map(q => "quality" -> q.id))
       .add(inTaxon.map("in_taxon" -> _.id))
@@ -137,12 +140,13 @@ object KBAPI {
     get[ResultList[Facet]](s"$api/phenotype/facet/$facet?${toQuery(params)}").map(_.results)
   }
 
-  def queryStudiesWithPhenotype(entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean): Observable[List[Term]] = {
+  def queryStudiesWithPhenotype(entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean, limit: Int, offset: Int): Observable[List[Term]] = {
     val params = Map[String, Any](
       "parts" -> parts,
       "historical_homologs" -> historicalHomologs,
       "serial_homologs" -> serialHomologs,
-      "limit" -> 20)
+      "limit" -> limit,
+      "offset" -> offset)
       .add(entity.map(e => "entity" -> e.id))
       .add(quality.map(q => "quality" -> q.id))
       .add(inTaxon.map("in_taxon" -> _.id))
