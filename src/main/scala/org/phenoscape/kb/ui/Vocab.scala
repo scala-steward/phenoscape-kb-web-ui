@@ -15,6 +15,7 @@ object Vocab {
   val PATO = "http://purl.obolibrary.org/obo/pato.owl"
   val TaxonSimilarityCorpus = "http://kb.phenoscape.org/sim/taxa"
   val GeneSimilarityCorpus = "http://kb.phenoscape.org/sim/genes"
+  val CharacterStateDataMatrix = "http://purl.obolibrary.org/obo/CDAO_0000056"
 
   private val Prefixes = Map(
     "VTO" -> "http://purl.obolibrary.org/obo/VTO_",
