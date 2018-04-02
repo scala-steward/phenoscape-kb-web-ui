@@ -39,7 +39,18 @@ object BaseLayout {
             cls := "panel panel-default",
             div(
               cls := "panel-body",
-              h6("The Phenoscape project is funded by NSF grants DBI-1062404 and DBI-1062542, and supported by the National Evolutionary Synthesis Center (NESCent), NSF EF-0905606."))))))
+              h6(
+                "The Phenoscape project is currently funded by NSF ABI Innovation collaborative grants (",
+                a(href := "https://www.nsf.gov/awardsearch/showAward?AWD_ID=1661529", "1661529"), ", ",
+                a(href := "https://www.nsf.gov/awardsearch/showAward?AWD_ID=1661356", "1661356"), ", ",
+                a(href := "https://www.nsf.gov/awardsearch/showAward?AWD_ID=1661456", "1661456"), ", ",
+                a(href := "https://www.nsf.gov/awardsearch/showAward?AWD_ID=1661516", "1661516"),
+                ") and an ABI Development grant (",
+                a(href := "https://www.nsf.gov/awardsearch/showAward?AWD_ID=1062542", "1062542"),
+                "). Phenoscape was previously funded by NSF ",
+                a(href := "https://www.nsf.gov/awardsearch/showAward?AWD_ID=1062404", "1062404"), "  and ",
+                a(href := "https://www.nsf.gov/awardsearch/showAward?AWD_ID=0641025", "0641025"), ", and supported by NESCent, NSF ",
+                a(href := "https://www.nsf.gov/awardsearch/showAward?AWD_ID=0905606", "0905606"), "."))))))
   }
 
 }
