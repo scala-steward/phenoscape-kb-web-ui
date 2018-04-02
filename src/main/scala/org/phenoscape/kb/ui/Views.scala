@@ -19,7 +19,7 @@ object Views {
     var classes = List("taxon-name")
     if (taxon.extinct) classes = "extinct" :: classes
     val genusSpecies = if (isGenusOrSpecies) "genus-species" else ""
-    span(cls := classes.mkString(" "), title := taxon.iri, span(cls := genusSpecies, taxon.label))
+    span(cls := classes.mkString(" "), title := taxon.iri.id, span(cls := genusSpecies, taxon.label))
   }
 
   def classification(data: Classification, termRenderer: Term => VNode): VNode = {
