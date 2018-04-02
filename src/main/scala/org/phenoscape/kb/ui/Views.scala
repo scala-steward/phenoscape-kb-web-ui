@@ -52,7 +52,7 @@ object Views {
 
   def autocompleteField[T](search: String => Observable[List[T]], selection: Observable[Option[T]], show: T => String, makeSelection: Sink[Option[T]], placeholderText: Option[String]): VNode = {
     val enteredText = createStringHandler()
-   // val selectedIndex = createHandler[Int](0)
+    // val selectedIndex = createHandler[Int](0)
 
     val currentMatches = (for {
       text <- enteredText.filter(_.size > 2).debounceTime(300)
@@ -62,12 +62,12 @@ object Views {
 
     val selectedAsText = selection.map(_.map(show).getOrElse(""))
     val keyHandler = createHandler[String]() //
-//    keyHandler.filter(_ == "down").combineLatestWith(selectedIndex) { (_, index) =>
-//      index + 1
-//    }
-//    val currentIndex = selectedIndex.merge(hideDropdown.map(_ => 0), keyHandler.filter(_ == "down").combineLatestWith(selectedIndex) { (_, index) =>
-//      index + 1
-//    })
+    //    keyHandler.filter(_ == "down").combineLatestWith(selectedIndex) { (_, index) =>
+    //      index + 1
+    //    }
+    //    val currentIndex = selectedIndex.merge(hideDropdown.map(_ => 0), keyHandler.filter(_ == "down").combineLatestWith(selectedIndex) { (_, index) =>
+    //      index + 1
+    //    })
     val shouldFocus = createBoolHandler(false) //
     val ulDisplay = hideDropdown.map(if (_) "none" else "block")
     val ulCSS = Util.observableCSS(Observable.of("autocomplete-menu" -> true, "dropdown-menu" -> true).merge(hideDropdown.map("live" -> !_)))
@@ -90,6 +90,7 @@ object Views {
         cls := "form-control",
         inputString --> enteredText,
         value <-- selectedAsText,
+        change.filter(_.target.value.isEmpty)(None) --> makeSelection,
         autocomplete := "off",
         placeholder := placeholderText.getOrElse("")),
       ul(
