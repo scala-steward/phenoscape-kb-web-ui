@@ -27,6 +27,15 @@ object Model {
 
   }
 
+  final case class TermInfo(term: Term, definition: Option[String], synonyms: List[(IRI, String)])
+
+  object TermInfo {
+
+    implicit val decoder: Decoder[TermInfo] = Decoder.forProduct4("@id", "label", "definition", "synonyms") { (id: String, label: String, definition: Option[String], synonyms: List[Map[String, String]]) =>
+      TermInfo(Term(IRI(id), label), definition.filterNot(_.isEmpty), synonyms.map { case syn => IRI(syn("property")) -> syn("value") })
+    }
+  }
+
   final case class Taxon(iri: IRI, label: String, commonName: Option[String], extinct: Boolean, rank: Option[Term])
 
   object Taxon {

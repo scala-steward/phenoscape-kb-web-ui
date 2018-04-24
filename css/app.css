@@ -56,3 +56,5 @@ div.classification-level div.classification-level {padding-left: 1.5em;}
 
 .autocomplete-menu {display: none;}
 .autocomplete-menu.live {display: block;}
+
+.synonym-type {color: gray;}

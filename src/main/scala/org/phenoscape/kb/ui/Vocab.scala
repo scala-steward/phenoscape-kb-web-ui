@@ -24,6 +24,12 @@ object Vocab {
     "PATO" -> "http://purl.obolibrary.org/obo/PATO_",
     "ZFIN" -> "http://zfin.org/")
 
+  val synonymTypes: Map[IRI, String] = Map(
+    IRI("http://www.geneontology.org/formats/oboInOwl#hasExactSynonym") -> "exact",
+    IRI("http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym") -> "narrow",
+    IRI("http://www.geneontology.org/formats/oboInOwl#hasBroadSynonym") -> "broad",
+    IRI("http://www.geneontology.org/formats/oboInOwl#hasRelatedSynonym") -> "related")
+
   private val Expansions = Prefixes.map(_.swap)
 
   def expand(curie: Curie): IRI = {

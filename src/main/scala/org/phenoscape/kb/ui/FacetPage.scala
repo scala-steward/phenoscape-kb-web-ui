@@ -12,6 +12,8 @@ import outwatch.dom.VNode
 import outwatch.redux.Component
 import outwatch.redux.Store
 import rxscalajs.Observable
+import outwatch.dom.helpers.EventEmitterBuilder
+import scala.annotation.tailrec
 
 object FacetPage extends Component {
 
@@ -96,24 +98,24 @@ object FacetPage extends Component {
     val querySpecObs = entity.combineLatest(quality, taxon, publication)
     val phenotypesTotalObs = querySpecObs.flatMap {
       case (e, q, t, p) =>
-        KBAPI.countTaxonPhenotypes(e, q, t, p, false, false, false)
+        KBAPI.countTaxonPhenotypes(e, q, t, p, false, false, false).map(Option(_)).startWith(None)
     }
-    val phenotypesTotalPagesObs = phenotypesTotalObs.map(totalToPages)
+    val phenotypesTotalPagesObs = phenotypesTotalObs.map(_.map(totalToPages))
     val taxaTotalObs = querySpecObs.flatMap {
       case (e, q, t, p) =>
-        KBAPI.countTaxaWithPhenotype(e, q, t, p, false, false, false)
+        KBAPI.countTaxaWithPhenotype(e, q, t, p, false, false, false).map(Option(_)).startWith(None)
     }
-    val taxaTotalPagesObs = taxaTotalObs.map(totalToPages)
+    val taxaTotalPagesObs = taxaTotalObs.map(_.map(totalToPages))
     val annotationsTotalObs = querySpecObs.flatMap {
       case (e, q, t, p) =>
-        KBAPI.countTaxonAnnotations(e, q, t, p, false, false, false)
+        KBAPI.countTaxonAnnotations(e, q, t, p, false, false, false).map(Option(_)).startWith(None)
     }
-    val annotationsTotalPagesObs = annotationsTotalObs.map(totalToPages)
+    val annotationsTotalPagesObs = annotationsTotalObs.map(_.map(totalToPages))
     val publicationsTotalObs = querySpecObs.flatMap {
       case (e, q, t, p) =>
-        KBAPI.countStudiesWithPhenotype(e, q, t, p, false, false, false)
+        KBAPI.countStudiesWithPhenotype(e, q, t, p, false, false, false).map(Option(_)).startWith(None)
     }
-    val publicationsTotalPagesObs = publicationsTotalObs.map(totalToPages)
+    val publicationsTotalPagesObs = publicationsTotalObs.map(_.map(totalToPages))
     val currentPagesObs = store.map(s => Map[FacetTab, Int](
       PhenotypesTab -> s.phenotypesPage,
       TaxaTab -> s.taxaPage,
@@ -201,13 +203,13 @@ object FacetPage extends Component {
         ul(
           cls := "nav nav-tabs",
           li(role := "presentation", cls <-- Util.observableCSS(activeTab.map(t => "active" -> (t == PhenotypesTab))),
-            a(click(SelectTab(PhenotypesTab)) --> store, role := "button", "Phenotypes ", span(cls := "badge", child <-- phenotypesTotalObs))),
+            a(click(SelectTab(PhenotypesTab)) --> store, role := "button", "Phenotypes ", span(cls := "badge", child <-- phenotypesTotalObs.map(_.getOrElse(""))))),
           li(role := "presentation", cls <-- Util.observableCSS(activeTab.map(t => "active" -> (t == AnnotationsTab))),
-            a(click(SelectTab(AnnotationsTab)) --> store, role := "button", "Annotations ", span(cls := "badge", child <-- annotationsTotalObs))),
+            a(click(SelectTab(AnnotationsTab)) --> store, role := "button", "Annotations ", span(cls := "badge", child <-- annotationsTotalObs.map(_.getOrElse(""))))),
           li(role := "presentation", cls <-- Util.observableCSS(activeTab.map(t => "active" -> (t == TaxaTab))),
-            a(click(SelectTab(TaxaTab)) --> store, role := "button", "Taxa ", span(cls := "badge", child <-- taxaTotalObs))),
+            a(click(SelectTab(TaxaTab)) --> store, role := "button", "Taxa ", span(cls := "badge", child <-- taxaTotalObs.map(_.getOrElse(""))))),
           li(role := "presentation", cls <-- Util.observableCSS(activeTab.map(t => "active" -> (t == PublicationsTab))),
-            a(click(SelectTab(PublicationsTab)) --> store, role := "button", "Publications ", span(cls := "badge", child <-- publicationsTotalObs)))),
+            a(click(SelectTab(PublicationsTab)) --> store, role := "button", "Publications ", span(cls := "badge", child <-- publicationsTotalObs.map(_.getOrElse("")))))),
         div(
           cls := "panel panel-default",
           style := "margin-top: 1em;",
@@ -217,10 +219,10 @@ object FacetPage extends Component {
           div(
             cls := "panel-body"),
           child <-- tableWithData),
-        div(hidden <-- activeTab.map(_ != TaxaTab), Views.pagination(obsTaxonPage, store.redirectMap(SetPage(TaxaTab, _)), taxaTotalPagesObs)),
-        div(hidden <-- activeTab.map(_ != PhenotypesTab), Views.pagination(obsPhenotypesPage, store.redirectMap(SetPage(PhenotypesTab, _)), phenotypesTotalPagesObs)),
-        div(hidden <-- activeTab.map(_ != AnnotationsTab), Views.pagination(obsAnnotationsPage, store.redirectMap(SetPage(AnnotationsTab, _)), annotationsTotalPagesObs)),
-        div(hidden <-- activeTab.map(_ != PublicationsTab), Views.pagination(obsPublicationsPage, store.redirectMap(SetPage(PublicationsTab, _)), publicationsTotalPagesObs))))
+        div(hidden <-- activeTab.map(_ != TaxaTab), Views.pagination(obsTaxonPage, store.redirectMap(SetPage(TaxaTab, _)), taxaTotalPagesObs.map(_.getOrElse(0)))),
+        div(hidden <-- activeTab.map(_ != PhenotypesTab), Views.pagination(obsPhenotypesPage, store.redirectMap(SetPage(PhenotypesTab, _)), phenotypesTotalPagesObs.map(_.getOrElse(0)))),
+        div(hidden <-- activeTab.map(_ != AnnotationsTab), Views.pagination(obsAnnotationsPage, store.redirectMap(SetPage(AnnotationsTab, _)), annotationsTotalPagesObs.map(_.getOrElse(0)))),
+        div(hidden <-- activeTab.map(_ != PublicationsTab), Views.pagination(obsPublicationsPage, store.redirectMap(SetPage(PublicationsTab, _)), publicationsTotalPagesObs.map(_.getOrElse(0))))))
   }
 
   private def dataTable(tab: FacetTab, querySpec: (Option[Model.IRI], Option[Model.IRI], Option[Model.IRI], Option[Model.IRI]), currentPages: Map[FacetTab, Int], tableSize: Int): VNode = {
@@ -326,13 +328,39 @@ object FacetPage extends Component {
     val count = countFunc.flatMap(_(Some(currentTerm)).map(_.toString).startWith(""))
     val indent = span(termPath.map(_ => span(cls := "facet-indent")): _*)
     val cssClass = if (selected) "selected-facet" else ""
-    div(cls := "facet-line", indent, a(role := "button", cls := cssClass, click(termPath) --> newFocus, child <-- termLabelObs), " ", span(cls := "badge", child <-- count))
+    val showPopup = createBoolHandler(false) //FIXME clean up into popover API
+    div(cls := "facet-line", indent,
+      Popover.popup(termInfoView(currentTerm), "right")(cls := cssClass, click(termPath) --> newFocus, child <-- termLabelObs),
+      " ", span(cls := "badge", child <-- count))
   }
 
   private def facetChildLink(facetItem: Facet, termPath: List[IRI], newFocus: Sink[List[IRI]]): VNode = {
     val newPath = facetItem.term.iri :: termPath
     val indent = span(newPath.map(_ => span(cls := "facet-indent")): _*)
-    div(cls := "facet-line", indent, a(role := "button", click(newPath) --> newFocus, facetItem.term.label), " ", span(cls := "badge", facetItem.count.toString))
+    div(cls := "facet-line", indent,
+      Popover.popup(termInfoView(facetItem.term.iri), "right")(click(newPath) --> newFocus, facetItem.term.label),
+      " ", span(cls := "badge", facetItem.count.toString))
+  }
+
+  private def termInfoView(iri: IRI): VNode = {
+    val term = KBAPI.termInfo(iri)
+    def formatSynonyms(syns: List[(IRI, String)]): VNode = if (syns.isEmpty) i("None")
+    else {
+      val synNodes = syns.sortBy(_._2.toLowerCase).map { case (relation, value) => span(value, " ", span(cls := "synonym-type", s"(${Vocab.synonymTypes(relation)})")) }
+      span(interpolate(span(", "), synNodes): _*)
+    }
+    div(
+      h4(child <-- term.map(_.term.label)),
+      dl(
+        dt("Synonyms"), dd(child <-- term.map(t => formatSynonyms(t.synonyms))),
+        dt("Definition"), dd(child <-- term.map(_.definition.getOrElse(i("None")))),
+        dt("ID"), dd(Vocab.compact(iri).id)))
+  }
+
+  private def interpolate[T](elem: T, xs: List[T]): List[T] = xs match {
+    case Nil             => Nil
+    case last @ x :: Nil => last
+    case x :: xs         => x :: elem :: interpolate(elem, xs)
   }
 
 }

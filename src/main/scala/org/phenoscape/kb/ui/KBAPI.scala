@@ -20,6 +20,8 @@ object KBAPI {
 
   def termLabel(iri: IRI): Observable[Term] = get[Term](s"$api/term/label?iri=${enc(iri.id)}")
 
+  def termInfo(iri: IRI): Observable[TermInfo] = get[TermInfo](s"$api/term?iri=${enc(iri.id)}")
+
   def taxon(iri: IRI): Observable[Taxon] = get[Taxon](s"$api/taxon?iri=${enc(iri.id)}")
 
   def gene(iri: IRI): Observable[Gene] = get[Gene](s"$api/gene?iri=${enc(iri.id)}")

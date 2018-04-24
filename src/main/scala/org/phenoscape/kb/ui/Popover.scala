@@ -26,6 +26,22 @@ object Popover {
     })
   }
 
+  def popup(popupView: => VNode, placement: String)(args: VDomModifier*): VNode = { //FIXME placement should be enum
+    val loadPopup = createBoolHandler(false)
+    val termInfoView = loadPopup.distinctUntilChanged.map {
+      case true  => popupView
+      case false => div()
+    }
+    val fullArgs = Seq(
+      span(hidden := true, cls := "popover-element", child <-- termInfoView),
+      mouseenter(true) --> loadPopup,
+      data.toggle := "popover", data.trigger := "hover", data.placement := placement, data.container := "body", data.html := true,
+      Popover.complexPopover,
+      tabindex := 0,
+      role := "button") ++ args
+    a(fullArgs: _*)
+  }
+
   @js.native
   private trait PopoverOptions extends js.Object {
     var content: js.Function = js.native
