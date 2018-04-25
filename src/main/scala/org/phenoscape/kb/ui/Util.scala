@@ -1,9 +1,10 @@
 package org.phenoscape.kb.ui
 
+import org.phenoscape.kb.ui.Model.IRI
+
 import outwatch.Sink
 import outwatch.dom.Handler
 import rxscalajs.Observable
-import Model.IRI
 
 object Util {
 
@@ -30,6 +31,12 @@ object Util {
   def taxonThumbnailIRI(phylopic: IRI): IRI = {
     val uuid = phylopic.id.replaceAllLiterally("http://phylopic.org/image/", "").replaceAllLiterally("/", "")
     IRI(s"http://phylopic.org/assets/images/submissions/$uuid.64.png")
+  }
+
+  def interpolate[T](elem: T, xs: List[T]): List[T] = xs match {
+    case Nil             => Nil
+    case last @ x :: Nil => last
+    case x :: xs         => x :: elem :: interpolate(elem, xs)
   }
 
 }

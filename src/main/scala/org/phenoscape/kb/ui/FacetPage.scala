@@ -4,6 +4,7 @@ import org.phenoscape.kb.ui.Model.Facet
 import org.phenoscape.kb.ui.Model.IRI
 import org.phenoscape.kb.ui.Model.Term
 import org.phenoscape.kb.ui.Model.TaxonAnnotation
+import org.phenoscape.kb.ui.Views
 
 import outwatch.Sink
 import outwatch.dom._
@@ -330,7 +331,7 @@ object FacetPage extends Component {
     val cssClass = if (selected) "selected-facet" else ""
     val showPopup = createBoolHandler(false) //FIXME clean up into popover API
     div(cls := "facet-line", indent,
-      Popover.popup(termInfoView(currentTerm), "right")(cls := cssClass, click(termPath) --> newFocus, child <-- termLabelObs),
+      Popover.popup(Views.termInfoView(currentTerm), "right")(cls := cssClass, click(termPath) --> newFocus, child <-- termLabelObs),
       " ", span(cls := "badge", child <-- count))
   }
 
@@ -338,29 +339,8 @@ object FacetPage extends Component {
     val newPath = facetItem.term.iri :: termPath
     val indent = span(newPath.map(_ => span(cls := "facet-indent")): _*)
     div(cls := "facet-line", indent,
-      Popover.popup(termInfoView(facetItem.term.iri), "right")(click(newPath) --> newFocus, facetItem.term.label),
+      Popover.popup(Views.termInfoView(facetItem.term.iri), "right")(click(newPath) --> newFocus, facetItem.term.label),
       " ", span(cls := "badge", facetItem.count.toString))
-  }
-
-  private def termInfoView(iri: IRI): VNode = {
-    val term = KBAPI.termInfo(iri)
-    def formatSynonyms(syns: List[(IRI, String)]): VNode = if (syns.isEmpty) i("None")
-    else {
-      val synNodes = syns.sortBy(_._2.toLowerCase).map { case (relation, value) => span(value, " ", span(cls := "synonym-type", s"(${Vocab.synonymTypes(relation)})")) }
-      span(interpolate(span(", "), synNodes): _*)
-    }
-    div(
-      h4(child <-- term.map(_.term.label)),
-      dl(
-        dt("Synonyms"), dd(child <-- term.map(t => formatSynonyms(t.synonyms))),
-        dt("Definition"), dd(child <-- term.map(_.definition.getOrElse(i("None")))),
-        dt("ID"), dd(Vocab.compact(iri).id)))
-  }
-
-  private def interpolate[T](elem: T, xs: List[T]): List[T] = xs match {
-    case Nil             => Nil
-    case last @ x :: Nil => last
-    case x :: xs         => x :: elem :: interpolate(elem, xs)
   }
 
 }

@@ -1,16 +1,17 @@
 package org.phenoscape.kb.ui
 
 import org.phenoscape.kb.ui.Model.Classification
+import org.phenoscape.kb.ui.Model.IRI
 import org.phenoscape.kb.ui.Model.Taxon
 import org.phenoscape.kb.ui.Model.Term
 import org.phenoscape.kb.ui.Vocab._
 
+import outwatch.Sink
 import outwatch.dom._
-import outwatch.dom.Attributes.title
 import outwatch.dom.Attributes.style
+import outwatch.dom.Attributes.title
 import outwatch.dom.VNode
 import rxscalajs.Observable
-import outwatch.Sink
 
 object Views {
 
@@ -33,6 +34,21 @@ object Views {
         cls := "classification-level",
         p(data.label, span(children <-- equivalents)),
         div(cls := "classification-level", ul(cls := "list-unstyled", children <-- subClasses))))
+  }
+
+  def termInfoView(iri: IRI): VNode = {
+    val term = KBAPI.termInfo(iri)
+    def formatSynonyms(syns: List[(IRI, String)]): VNode = if (syns.isEmpty) i("None")
+    else {
+      val synNodes = syns.sortBy(_._2.toLowerCase).map { case (relation, value) => span(value, " ", span(cls := "synonym-type", s"(${Vocab.synonymTypes(relation)})")) }
+      span(Util.interpolate(span(", "), synNodes): _*)
+    }
+    div(
+      h4(child <-- term.map(_.term.label)),
+      dl(
+        dt("Synonyms"), dd(child <-- term.map(t => formatSynonyms(t.synonyms))),
+        dt("Definition"), dd(child <-- term.map(_.definition.getOrElse(i("None")))),
+        dt("ID"), dd(Vocab.compact(iri).id)))
   }
 
   def pagination(currentPage: Observable[Int], newPage: Sink[Int], totalPages: Observable[Int]): VNode = {
