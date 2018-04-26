@@ -36,13 +36,15 @@ object Views {
         div(cls := "classification-level", ul(cls := "list-unstyled", children <-- subClasses))))
   }
 
-  def termInfoView(iri: IRI): VNode = {
-    val term = KBAPI.termInfo(iri)
-    def formatSynonyms(syns: List[(IRI, String)]): VNode = if (syns.isEmpty) i("None")
+  def formatSynonyms(syns: List[(IRI, String)]): VNode =
+    if (syns.isEmpty) i("None")
     else {
       val synNodes = syns.sortBy(_._2.toLowerCase).map { case (relation, value) => span(value, " ", span(cls := "synonym-type", s"(${Vocab.synonymTypes(relation)})")) }
       span(Util.interpolate(span(", "), synNodes): _*)
     }
+
+  def termInfoView(iri: IRI): VNode = {
+    val term = KBAPI.termInfo(iri)
     div(
       h4(child <-- term.map(_.term.label)),
       dl(

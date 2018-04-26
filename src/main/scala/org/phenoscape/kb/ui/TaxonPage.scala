@@ -34,6 +34,7 @@ object TaxonPage extends Component {
     import outwatch.dom._
 
     val obsTaxon = store.flatMap(s => KBAPI.taxon(s.taxonIRI))
+    val obsTermInfo = store.flatMap(s => KBAPI.termInfo(s.taxonIRI))
     val obsClassificationData = store.flatMap(s => KBAPI.classification(s.taxonIRI, IRI(VTO)))
     def taxonTermToView(term: Term) = a(
       href := s"#/taxon/${Vocab.compact(term.iri).id}",
@@ -48,6 +49,10 @@ object TaxonPage extends Component {
           " ",
           a(href <-- store.map(_.taxonIRI.id), target := "_blank", cls := "link-no-color",
             child <-- store.map(s => Vocab.compact(s.taxonIRI).id)))),
+      div(
+        dl(
+          dt("Rank:"), dd(child <-- obsTaxon.map(t => t.rank.map(_.label).getOrElse(i("None")))),
+          dt("Synonyms:"), dd(child <-- obsTermInfo.map(t => Views.formatSynonyms(t.synonyms))))),
       div(
         cls := "panel panel-default top-buffer",
         div(cls := "panel-body", child <-- obsClassificationData.map(Views.classification(_, taxonTermToView)))))
