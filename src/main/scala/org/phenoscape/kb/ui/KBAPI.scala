@@ -223,6 +223,8 @@ object KBAPI {
   def classification(iri: IRI, definedBy: IRI): Observable[Classification] = get[Classification](s"$api/term/classification?iri=${enc(iri.id)}&definedBy=${enc(definedBy.id)}")
 
   def taxonCommonGroup(taxon: IRI): Observable[TaxonGroup] = get[TaxonGroup](s"$api/taxon/group?iri=${enc(taxon.id)}")
+  
+  def kbInfo: Observable[KBInfo] = get[KBInfo](s"$api/kb/annotation_summary")
 
   private def enc(value: String): String = encodeURIComponent(value)
 

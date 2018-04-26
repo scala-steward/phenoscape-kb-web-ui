@@ -2,6 +2,7 @@ package org.phenoscape.kb.ui
 
 import io.circe._
 import io.circe.generic.auto._
+import scala.scalajs.js.Date
 
 object Model {
 
@@ -96,5 +97,17 @@ object Model {
   final case class TaxonGroup(label: String, phylopic: IRI)
 
   final case class Facet(term: Term, count: Int)
+
+  final case class KBInfo(buildDate: Date, annotatedMatrices: Int, annotatedTaxa: Int, annotatedCharacters: Int, annotatedStates: Int)
+
+  object KBInfo {
+
+    private def toDate(text: String): Date = new Date(Date.parse(text))
+
+    implicit val decoder: Decoder[KBInfo] = Decoder.forProduct5("build_time", "annotated_matrices", "annotated_taxa", "annotated_characters", "annotated_states") { (date: String, matrices: Int, taxa: Int, characters: Int, states: Int) =>
+      KBInfo(toDate(date), matrices, taxa, characters, states)
+    }
+
+  }
 
 }
