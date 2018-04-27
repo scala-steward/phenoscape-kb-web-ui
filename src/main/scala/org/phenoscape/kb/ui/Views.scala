@@ -67,6 +67,8 @@ object Views {
         li(cls <-- nextAndLastClasses, a(role := "button", click(currentPage.map(_ + 1)) --> newPage, "Next")),
         li(cls <-- nextAndLastClasses, a(role := "button", click(totalPages) --> newPage, "Last"))))
   }
+  
+  val loading: VNode = img(src := "img/ajax-loader.gif") //FIXME verify path
 
   def autocompleteField[T](search: String => Observable[List[T]], selection: Observable[Option[T]], show: T => String, makeSelection: Sink[Option[T]], placeholderText: Option[String]): VNode = {
     val enteredText = createStringHandler()

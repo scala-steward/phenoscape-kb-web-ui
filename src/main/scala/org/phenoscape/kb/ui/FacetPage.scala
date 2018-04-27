@@ -2,9 +2,8 @@ package org.phenoscape.kb.ui
 
 import org.phenoscape.kb.ui.Model.Facet
 import org.phenoscape.kb.ui.Model.IRI
-import org.phenoscape.kb.ui.Model.Term
 import org.phenoscape.kb.ui.Model.TaxonAnnotation
-import org.phenoscape.kb.ui.Views
+import org.phenoscape.kb.ui.Model.Term
 
 import outwatch.Sink
 import outwatch.dom._
@@ -13,8 +12,6 @@ import outwatch.dom.VNode
 import outwatch.redux.Component
 import outwatch.redux.Store
 import rxscalajs.Observable
-import outwatch.dom.helpers.EventEmitterBuilder
-import scala.annotation.tailrec
 
 object FacetPage extends Component {
 
@@ -275,7 +272,7 @@ object FacetPage extends Component {
     } //FIXME repeated code with similarity page
     tr(
       td(child <-- group),
-      td(child <-- taxonName.startWith(term.label)))
+      td(Popover.popup(Views.termInfoView(term.iri), "auto", "focus")(child <-- taxonName.startWith(term.label))))
   }
 
   private def taxonAnnotationRow(annotation: TaxonAnnotation): VNode = {
@@ -287,7 +284,7 @@ object FacetPage extends Component {
     } //FIXME repeated code with similarity page
     tr(
       td(child <-- group),
-      td(child <-- taxonName.startWith(annotation.taxon.label)),
+      td(Popover.popup(Views.termInfoView(annotation.taxon.iri), "auto", "focus")(child <-- taxonName.startWith(annotation.taxon.label))),
       td(annotation.phenotype.label),
       td(annotation.source.label))
   }
@@ -306,6 +303,7 @@ object FacetPage extends Component {
     val facetChildElements = focusItemPath.combineLatestWith(facetFunc) { (list, facetFn) =>
       facetFn(list.headOption).startWith(Nil).map(_.sortBy(-_.count).map(facetChildLink(_, list, newFocus)))
     }.flatten
+    val childrenLoaded = facetChildElements.map(_.nonEmpty)
     val anyCount = countFunc.flatMap(_(None).map(_.toString).startWith(""))
     val anySelected = focusItemPath.map(_.isEmpty)
     val anyCSSClass = anySelected.map(flag => if (flag) "selected-facet" else "")
@@ -320,26 +318,28 @@ object FacetPage extends Component {
         cls := "panel-body",
         div(cls := "facet-line", a(role := "button", cls <-- anyCSSClass, click(Nil) --> newFocus, s"Any $title"), " ", span(cls := "badge", child <-- anyCount)),
         div(children <-- facetPathElements),
-        div(children <-- facetChildElements)))
+        div(children <-- facetChildElements),
+        div(hidden <-- childrenLoaded, Views.loading)))
   }
 
   private def facetPathLink(termPath: List[IRI], countFunc: Observable[CountFn], newFocus: Sink[List[IRI]], selected: Boolean): VNode = {
     val currentTerm = termPath.head
     val termLabelObs = KBAPI.termLabel(currentTerm).map(_.label)
-    val count = countFunc.flatMap(_(Some(currentTerm)).map(_.toString).startWith(""))
+    val countValue = countFunc.flatMap(_(Some(currentTerm)))
+    val countLoaded = countValue.map(_ => true).startWith(false)
+    val count = countValue.map(_.toString).startWith("")
     val indent = span(termPath.map(_ => span(cls := "facet-indent")): _*)
     val cssClass = if (selected) "selected-facet" else ""
-    val showPopup = createBoolHandler(false) //FIXME clean up into popover API
     div(cls := "facet-line", indent,
-      Popover.popup(Views.termInfoView(currentTerm), "right")(cls := cssClass, click(termPath) --> newFocus, child <-- termLabelObs),
-      " ", span(cls := "badge", child <-- count))
+      Popover.popup(Views.termInfoView(currentTerm), "right", "hover")(cls := cssClass, click(termPath) --> newFocus, child <-- termLabelObs),
+      " ", span(hidden <-- countLoaded, Views.loading), span(cls := "badge", child <-- count))
   }
 
   private def facetChildLink(facetItem: Facet, termPath: List[IRI], newFocus: Sink[List[IRI]]): VNode = {
     val newPath = facetItem.term.iri :: termPath
     val indent = span(newPath.map(_ => span(cls := "facet-indent")): _*)
     div(cls := "facet-line", indent,
-      Popover.popup(Views.termInfoView(facetItem.term.iri), "right")(click(newPath) --> newFocus, facetItem.term.label),
+      Popover.popup(Views.termInfoView(facetItem.term.iri), "right", "hover")(click(newPath) --> newFocus, facetItem.term.label),
       " ", span(cls := "badge", facetItem.count.toString))
   }
 
