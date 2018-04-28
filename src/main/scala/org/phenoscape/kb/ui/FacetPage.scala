@@ -300,10 +300,14 @@ object FacetPage extends Component {
           facetPathLink(path, countFunc, newFocus, index == lastIndex)
       }
     }.startWith(Nil)
-    val facetChildElements = focusItemPath.combineLatestWith(facetFunc) { (list, facetFn) =>
-      facetFn(list.headOption).startWith(Nil).map(_.sortBy(-_.count).map(facetChildLink(_, list, newFocus)))
+    val facetDataAndStatus = focusItemPath.combineLatestWith(facetFunc) { (list, facetFn) =>
+      facetFn(list.headOption).map((_, list) -> true).startWith((Nil, list) -> false)
     }.flatten
-    val childrenLoaded = facetChildElements.map(_.nonEmpty)
+    val facetChildElements = facetDataAndStatus.map {
+      case ((facets, list), _) =>
+        facets.sortBy(-_.count).map(facetChildLink(_, list, newFocus))
+    }
+    val childrenLoaded = facetDataAndStatus.map(_._2)
     val anyCount = countFunc.flatMap(_(None).map(_.toString).startWith(""))
     val anySelected = focusItemPath.map(_.isEmpty)
     val anyCSSClass = anySelected.map(flag => if (flag) "selected-facet" else "")
