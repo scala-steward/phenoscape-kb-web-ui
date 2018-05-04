@@ -203,7 +203,7 @@ object FacetPage extends Component {
           li(role := "presentation", cls <-- Util.observableCSS(activeTab.map(t => "active" -> (t == PhenotypesTab))),
             a(click(SelectTab(PhenotypesTab)) --> store, role := "button", "Phenotypes ", span(cls := "badge", child <-- phenotypesTotalObs.map(_.getOrElse(""))))),
           li(role := "presentation", cls <-- Util.observableCSS(activeTab.map(t => "active" -> (t == AnnotationsTab))),
-            a(click(SelectTab(AnnotationsTab)) --> store, role := "button", "Annotations ", span(cls := "badge", child <-- annotationsTotalObs.map(_.getOrElse(""))))),
+            a(click(SelectTab(AnnotationsTab)) --> store, role := "button", "Taxon annotations ", span(cls := "badge", child <-- annotationsTotalObs.map(_.getOrElse(""))))),
           li(role := "presentation", cls <-- Util.observableCSS(activeTab.map(t => "active" -> (t == TaxaTab))),
             a(click(SelectTab(TaxaTab)) --> store, role := "button", "Taxa ", span(cls := "badge", child <-- taxaTotalObs.map(_.getOrElse(""))))),
           li(role := "presentation", cls <-- Util.observableCSS(activeTab.map(t => "active" -> (t == PublicationsTab))),
@@ -252,7 +252,7 @@ object FacetPage extends Component {
         val data = KBAPI.queryStudiesWithPhenotype(entity, quality, taxon, publication, false, false, false, tableSize, offset(currentPages(PublicationsTab))).startWith(Nil)
         (
           thead(tr(
-            th("Study"))),
+            th("Publication"))),
           tbody(children <-- data.map(_.map(singleTermRow))))
     }
     table(
