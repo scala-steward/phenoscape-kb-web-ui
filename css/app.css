@@ -58,3 +58,6 @@ div.classification-level div.classification-level {padding-left: 1.5em;}
 .autocomplete-menu.live {display: block;}
 
 .synonym-type {color: gray;}
+
+.search-picker {z-index: 500; position: absolute; margin-right: 30px;}
+.search-picker-group {box-shadow: 10px 10px 5px #888888;}

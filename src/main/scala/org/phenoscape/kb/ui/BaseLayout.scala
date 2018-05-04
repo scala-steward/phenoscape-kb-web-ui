@@ -2,10 +2,55 @@ package org.phenoscape.kb.ui
 
 import outwatch.dom._
 import rxscalajs.Observable
+import Util.StringOps
+import Model.IRI
 
 object BaseLayout {
 
   def view(node: Observable[VNode]): VNode = {
+    val searchTextHandler = createHandler[Option[String]](None)
+    val editingTextHandler = createStringHandler()
+    val textChanges = editingTextHandler.mapTo(None)
+    val searchTextOpt = searchTextHandler.merge(textChanges).startWith(None)
+    val hidePanel = searchTextOpt.map(_.isEmpty)
+    val searches = searchTextOpt.map {
+      case Some(text) => (
+        KBAPI.ontologyClassSearch(text, Some(IRI(Vocab.Uberon)), 20),
+        KBAPI.ontologyClassSearch(text, Some(IRI(Vocab.VTO)), 20))
+      case None => (Observable.empty, Observable.empty)
+    }
+    val anatomyLinks = for {
+      (termsObs, _) <- searches
+      terms <- termsObs.startWith(Nil)
+    } yield terms.map { term =>
+      li(a(
+        click("") --> editingTextHandler,
+        href := s"#/entity/${Vocab.compact(term.iri).id}", term.label))
+    }
+    val taxonLinks = for {
+      (_, termsObs) <- searches
+      terms <- termsObs.startWith(Nil)
+    } yield terms.map { term =>
+      li(a(
+        click("") --> editingTextHandler,
+        href := s"#/taxon/${Vocab.compact(term.iri).id}", term.label))
+    }
+    def searchPicker(title: String, links: Observable[List[VNode]]): VNode = {
+      val cssClasses = Util.observableCSS(links.map("text-muted" -> _.isEmpty))
+      div(
+        cls := "search-picker-group panel panel-default",
+        div(
+          cls := "panel-heading",
+          h4(
+            cls := "panel-title",
+            span(cls <-- cssClasses, title))),
+        div(
+          cls := "panel-body",
+          ul(
+            cls := "list-inline",
+            children <-- links)))
+    }
+
     div(
       cls := "container-fluid",
       div(
@@ -27,7 +72,40 @@ object BaseLayout {
               role := "button",
               href := "https://docs.google.com/forms/d/1tBoctX6qMLsm58raEW3Z2bNV1i6gVYaPCdZ2Ab28EbM/edit",
               target := "_blank",
-              i("Feedback"))))),
+              i("Feedback")))),
+        div(
+          cls := "col-xs-4",
+          div(
+            cls := "panel panel-default top-buffer",
+            div(
+              cls := "panel-body",
+              div(
+                cls := "form-group",
+                label(`for` := "mainSearch", "Find an item by name"),
+                div(
+                  cls := "input-group",
+                  input(
+                    id := "mainSearch",
+                    tpe := "search",
+                    cls := "form-control input-sm",
+                    placeholder := "Taxon or anatomical structure",
+                    change --> searchTextHandler.redirectMap(_.target.value.stripToOption),
+                    inputString --> editingTextHandler,
+                    value <-- editingTextHandler),
+                  span(
+                    cls := "input-group-btn",
+                    button(
+                      click("") --> editingTextHandler,
+                      cls := "btn btn-default btn-sm",
+                      tpe := "button",
+                      "×")))),
+              div(
+                cls := "search-picker",
+                hidden <-- hidePanel,
+                div(
+                  cls := "panel-group",
+                  searchPicker("Anatomical structures", anatomyLinks),
+                  searchPicker("Taxa", taxonLinks))))))),
 
       div(child <-- node),
 

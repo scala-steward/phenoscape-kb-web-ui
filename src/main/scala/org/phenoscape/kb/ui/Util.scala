@@ -39,4 +39,10 @@ object Util {
     case x :: xs         => x :: elem :: interpolate(elem, xs)
   }
 
+  implicit class StringOps(val self: String) extends AnyVal {
+
+    def stripToOption: Option[String] = if (self.isEmpty) None else Some(self)
+
+  }
+
 }
