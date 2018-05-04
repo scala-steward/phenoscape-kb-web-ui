@@ -65,7 +65,7 @@ object BaseLayout {
               button(tpe := "button", cls := "btn btn-default btn-sm dropdown-toggle", data.toggle := "dropdown", Aria.expanded := false,
                 "About ", span(cls := "caret")),
               ul(cls := "dropdown-menu", role := "menu",
-                li(a(href := "#/about/phenoscape", "Phenoscape")),
+                li(a(href := "http://phenoscape.org", "Phenoscape")),
                 li(a(href := "#/about/phenoscape/kb", "Phenoscape Knowledgebase")))),
             a(
               cls := "btn btn-primary btn-sm",
