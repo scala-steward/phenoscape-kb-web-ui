@@ -6,6 +6,10 @@
 
 blockquote.character { font-size: 14px; display: inline-block; }
 
+a[disabled] {
+   pointer-events: none;
+}
+
 .kb-form-condensed .form-group {
     margin-top: 0;
     margin-bottom: 0;

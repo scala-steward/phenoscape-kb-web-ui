@@ -10,6 +10,10 @@ import io.circe.generic.auto._
 import outwatch.http.Http
 import rxscalajs.Observable
 import rxscalajs.dom.Response
+import cats.data.Validated
+import cats.data.Validated.Valid
+import cats.data.Validated.Invalid
+import rxscalajs.dom.AjaxError
 
 object KBAPI {
 
@@ -223,8 +227,23 @@ object KBAPI {
   def classification(iri: IRI, definedBy: IRI): Observable[Classification] = get[Classification](s"$api/term/classification?iri=${enc(iri.id)}&definedBy=${enc(definedBy.id)}")
 
   def taxonCommonGroup(taxon: IRI): Observable[TaxonGroup] = get[TaxonGroup](s"$api/taxon/group?iri=${enc(taxon.id)}")
-  
+
   def kbInfo: Observable[KBInfo] = get[KBInfo](s"$api/kb/annotation_summary")
+
+  def resolveLabelExpression(expression: String): Observable[Validated[String, String]] =
+    Http.get(Observable.of(s"$api/term/resolve_label_expression?expression=${enc(expression)}")).catchError { e =>
+      // working around bug in error handling by Outwatch Http
+      val er = e.asInstanceOf[AjaxError]
+      Observable.just(Response(er.xhr.responseText, er.status.toInt, er.xhr.responseType, er.xhr, null))
+    }.map { res =>
+      res.status match {
+        case 200 => Valid(res.body)
+        case _   => Invalid(res.body)
+      }
+    }
+
+  def ontotraceURL(taxonExpression: String, entityExpression: String, includeParts: Boolean, variableOnly: Boolean): String =
+    s"$api/ontotrace?taxon=${enc(taxonExpression)}&entity=${enc(entityExpression)}&variable_only=$variableOnly&parts=$includeParts"
 
   private def enc(value: String): String = encodeURIComponent(value)
 
