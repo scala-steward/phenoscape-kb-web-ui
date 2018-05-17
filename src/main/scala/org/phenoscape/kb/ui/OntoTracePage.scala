@@ -185,7 +185,7 @@ object OntoTracePage extends Component {
                   dt("Taxon"),
                   dd("Characiformes or Siluriformes"),
                   dt("Entity"),
-                  dd("'skeletal element' and ('part of' some fin)'"))),
+                  dd("'skeletal element' and ('part of' some fin)"))),
               div(
                 h4("Taxon is:"),
                 div(
