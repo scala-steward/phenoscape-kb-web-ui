@@ -84,7 +84,7 @@ object FacetPage extends Component {
   def view(store: Store[State, Action]): VNode = {
     val tablePageSize = 40
     val entityPath = store.map(_.selectedEntityPath).distinctUntilChanged
-    val querySpecObs = store.map(_.currentQuerySpec).distinctUntilChanged
+    val querySpecObs = store.map(_.currentQuerySpec).distinctUntilChanged((a, b) => a == b) // Not sure why need to pass this comparison. Perhaps this will be fixed when move to Monix.
     val entity = querySpecObs.map(_.entity).distinctUntilChanged
     val qualityPath = store.map(_.selectedQualityPath).distinctUntilChanged
     val quality = querySpecObs.map(_.quality).distinctUntilChanged
@@ -133,7 +133,7 @@ object FacetPage extends Component {
       AnnotationsTab -> s.annotationsPage,
       PublicationsTab -> s.publicationsPage)).distinctUntilChanged
     val tableWithData = activeTab.combineLatestWith(querySpecObs, currentPagesObs)(dataTable(_, _, _, tablePageSize))
-    val entityCountFn = store.map(_.currentQuerySpec).map(spec => (spec.quality, spec.taxon, spec.publication, spec.includeParts, spec.includeHistoricalHomologs, spec.includeSerialHomologs)).distinctUntilChanged.combineLatestWith(activeTab) {
+    val entityCountFn = querySpecObs.map(spec => (spec.quality, spec.taxon, spec.publication, spec.includeParts, spec.includeHistoricalHomologs, spec.includeSerialHomologs)).distinctUntilChanged.combineLatestWith(activeTab) {
       case ((q, t, p, parts, hist, serial), tab) =>
         tab match {
           case PhenotypesTab   => KBAPI.countTaxonPhenotypes(_: Option[IRI], q, t, p, parts, hist, serial)
@@ -142,8 +142,7 @@ object FacetPage extends Component {
           case PublicationsTab => KBAPI.countStudiesWithPhenotype(_: Option[IRI], q, t, p, parts, hist, serial)
         }
     }
-
-    val entityFacetFn = store.map(_.currentQuerySpec).map(spec => (spec.quality, spec.taxon, spec.publication, spec.includeParts, spec.includeHistoricalHomologs, spec.includeSerialHomologs)).distinctUntilChanged.combineLatestWith(activeTab) {
+    val entityFacetFn = querySpecObs.map(spec => (spec.quality, spec.taxon, spec.publication, spec.includeParts, spec.includeHistoricalHomologs, spec.includeSerialHomologs)).distinctUntilChanged.combineLatestWith(activeTab) {
       case ((q, t, p, parts, hist, serial), tab) =>
         tab match {
           case PhenotypesTab   => KBAPI.facetTaxonPhenotypes("entity", _: Option[IRI], q, t, p, parts, hist, serial)
@@ -152,7 +151,7 @@ object FacetPage extends Component {
           case PublicationsTab => KBAPI.facetStudiesWithPhenotype("entity", _: Option[IRI], q, t, p, parts, hist, serial)
         }
     }
-    val qualityCountFn = store.map(_.currentQuerySpec).map(spec => (spec.entity, spec.taxon, spec.publication, spec.includeParts, spec.includeHistoricalHomologs, spec.includeSerialHomologs)).distinctUntilChanged.combineLatestWith(activeTab) {
+    val qualityCountFn = querySpecObs.map(spec => (spec.entity, spec.taxon, spec.publication, spec.includeParts, spec.includeHistoricalHomologs, spec.includeSerialHomologs)).distinctUntilChanged.combineLatestWith(activeTab) {
       case ((e, t, p, parts, hist, serial), tab) =>
         tab match {
           case PhenotypesTab   => KBAPI.countTaxonPhenotypes(e, _: Option[IRI], t, p, parts, hist, serial)
@@ -161,7 +160,7 @@ object FacetPage extends Component {
           case PublicationsTab => KBAPI.countStudiesWithPhenotype(e, _: Option[IRI], t, p, parts, hist, serial)
         }
     }
-    val qualityFacetFn = store.map(_.currentQuerySpec).map(spec => (spec.entity, spec.taxon, spec.publication, spec.includeParts, spec.includeHistoricalHomologs, spec.includeSerialHomologs)).distinctUntilChanged.combineLatestWith(activeTab) {
+    val qualityFacetFn = querySpecObs.map(spec => (spec.entity, spec.taxon, spec.publication, spec.includeParts, spec.includeHistoricalHomologs, spec.includeSerialHomologs)).distinctUntilChanged.combineLatestWith(activeTab) {
       case ((e, t, p, parts, hist, serial), tab) =>
         tab match {
           case PhenotypesTab   => KBAPI.facetTaxonPhenotypes("quality", e, _: Option[IRI], t, p, parts, hist, serial)
@@ -170,7 +169,7 @@ object FacetPage extends Component {
           case PublicationsTab => KBAPI.facetStudiesWithPhenotype("quality", e, _: Option[IRI], t, p, parts, hist, serial)
         }
     }
-    val taxonCountFn = store.map(_.currentQuerySpec).map(spec => (spec.entity, spec.quality, spec.publication, spec.includeParts, spec.includeHistoricalHomologs, spec.includeSerialHomologs)).distinctUntilChanged.combineLatestWith(activeTab) {
+    val taxonCountFn = querySpecObs.map(spec => (spec.entity, spec.quality, spec.publication, spec.includeParts, spec.includeHistoricalHomologs, spec.includeSerialHomologs)).distinctUntilChanged.combineLatestWith(activeTab) {
       case ((e, q, p, parts, hist, serial), tab) =>
         tab match {
           case PhenotypesTab   => KBAPI.countTaxonPhenotypes(e, q, _: Option[IRI], p, parts, hist, serial)
@@ -179,7 +178,7 @@ object FacetPage extends Component {
           case PublicationsTab => KBAPI.countStudiesWithPhenotype(e, q, _: Option[IRI], p, parts, hist, serial)
         }
     }
-    val taxonFacetFn = store.map(_.currentQuerySpec).map(spec => (spec.entity, spec.quality, spec.publication, spec.includeParts, spec.includeHistoricalHomologs, spec.includeSerialHomologs)).distinctUntilChanged.combineLatestWith(activeTab) {
+    val taxonFacetFn = querySpecObs.map(spec => (spec.entity, spec.quality, spec.publication, spec.includeParts, spec.includeHistoricalHomologs, spec.includeSerialHomologs)).distinctUntilChanged.combineLatestWith(activeTab) {
       case ((e, q, p, parts, hist, serial), tab) =>
         tab match {
           case PhenotypesTab   => KBAPI.facetTaxonPhenotypes("taxon", e, q, _: Option[IRI], p, parts, hist, serial)
