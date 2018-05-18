@@ -45,6 +45,14 @@ object Model {
 
   }
 
+  final case class Study(iri: IRI, label: String, citation: String)
+
+  object Study {
+
+    implicit val decoder: Decoder[Study] = Decoder.forProduct3("@id", "label", "citation")(Study.apply)
+
+  }
+
   final case class Gene(iri: IRI, label: String, taxon: Term)
 
   object Gene {

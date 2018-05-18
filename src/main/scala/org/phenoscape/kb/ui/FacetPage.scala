@@ -25,6 +25,9 @@ object FacetPage extends Component {
   final case class AddQualityToPath(quality: IRI) extends Action
   final case class AddTaxonToPath(quality: IRI) extends Action
   final case class SetPage(tab: FacetTab, page: Int) extends Action
+  final case class SetIncludeParts(include: Boolean) extends Action
+  final case class SetIncludeHistoricalHomologs(include: Boolean) extends Action
+  final case class SetIncludeSerialHomologs(include: Boolean) extends Action
 
   sealed trait FacetTab
   final case object PhenotypesTab extends FacetTab
@@ -32,26 +35,34 @@ object FacetPage extends Component {
   final case object AnnotationsTab extends FacetTab
   final case object PublicationsTab extends FacetTab
 
-  case class State(
-    selectedTab:         FacetTab,
-    selectedEntityPath:  List[IRI],
-    selectedQualityPath: List[IRI],
-    selectedTaxonPath:   List[IRI],
-    selectedPublication: Option[IRI],
-    taxaPage:            Int         = 1,
-    phenotypesPage:      Int         = 1,
-    annotationsPage:     Int         = 1,
-    publicationsPage:    Int         = 1) extends ComponentState {
+  final case class QuerySpec(entity: Option[IRI], quality: Option[IRI], taxon: Option[IRI], publication: Option[IRI], includeParts: Boolean, includeHistoricalHomologs: Boolean, includeSerialHomologs: Boolean)
+
+  final case class State(
+    selectedTab:               FacetTab,
+    selectedEntityPath:        List[IRI],
+    selectedQualityPath:       List[IRI],
+    selectedTaxonPath:         List[IRI],
+    selectedPublication:       Option[IRI],
+    includeParts:              Boolean,
+    includeHistoricalHomologs: Boolean,
+    includeSerialHomologs:     Boolean,
+    taxaPage:                  Int         = 1,
+    phenotypesPage:            Int         = 1,
+    annotationsPage:           Int         = 1,
+    publicationsPage:          Int         = 1) extends ComponentState {
 
     def evolve = {
-      case SelectTab(tab)              => copy(selectedTab = tab)
-      case SetEntityPath(entityList)   => copy(selectedEntityPath = entityList, taxaPage = 1, phenotypesPage = 1, annotationsPage = 1, publicationsPage = 1)
-      case SetQualityPath(qualityList) => copy(selectedQualityPath = qualityList, taxaPage = 1, phenotypesPage = 1, annotationsPage = 1, publicationsPage = 1)
-      case SetTaxonPath(taxonList)     => copy(selectedTaxonPath = taxonList, taxaPage = 1, phenotypesPage = 1, annotationsPage = 1, publicationsPage = 1)
-      case SetPublication(pubOpt)      => copy(selectedPublication = pubOpt, taxaPage = 1, phenotypesPage = 1, annotationsPage = 1, publicationsPage = 1)
-      case AddEntityToPath(entity)     => copy(selectedEntityPath = entity :: selectedEntityPath, taxaPage = 1, phenotypesPage = 1, annotationsPage = 1, publicationsPage = 1)
-      case AddQualityToPath(quality)   => copy(selectedQualityPath = quality :: selectedQualityPath, taxaPage = 1, phenotypesPage = 1, annotationsPage = 1, publicationsPage = 1)
-      case AddTaxonToPath(taxon)       => copy(selectedTaxonPath = taxon :: selectedTaxonPath, taxaPage = 1, phenotypesPage = 1, annotationsPage = 1, publicationsPage = 1)
+      case SelectTab(tab)                        => copy(selectedTab = tab)
+      case SetEntityPath(entityList)             => copy(selectedEntityPath = entityList, taxaPage = 1, phenotypesPage = 1, annotationsPage = 1, publicationsPage = 1)
+      case SetQualityPath(qualityList)           => copy(selectedQualityPath = qualityList, taxaPage = 1, phenotypesPage = 1, annotationsPage = 1, publicationsPage = 1)
+      case SetTaxonPath(taxonList)               => copy(selectedTaxonPath = taxonList, taxaPage = 1, phenotypesPage = 1, annotationsPage = 1, publicationsPage = 1)
+      case SetPublication(pubOpt)                => copy(selectedPublication = pubOpt, taxaPage = 1, phenotypesPage = 1, annotationsPage = 1, publicationsPage = 1)
+      case AddEntityToPath(entity)               => copy(selectedEntityPath = entity :: selectedEntityPath, taxaPage = 1, phenotypesPage = 1, annotationsPage = 1, publicationsPage = 1)
+      case AddQualityToPath(quality)             => copy(selectedQualityPath = quality :: selectedQualityPath, taxaPage = 1, phenotypesPage = 1, annotationsPage = 1, publicationsPage = 1)
+      case AddTaxonToPath(taxon)                 => copy(selectedTaxonPath = taxon :: selectedTaxonPath, taxaPage = 1, phenotypesPage = 1, annotationsPage = 1, publicationsPage = 1)
+      case SetIncludeParts(include)              => copy(includeParts = include, taxaPage = 1, phenotypesPage = 1, annotationsPage = 1, publicationsPage = 1)
+      case SetIncludeHistoricalHomologs(include) => copy(includeHistoricalHomologs = include, taxaPage = 1, phenotypesPage = 1, annotationsPage = 1, publicationsPage = 1)
+      case SetIncludeSerialHomologs(include)     => copy(includeSerialHomologs = include, taxaPage = 1, phenotypesPage = 1, annotationsPage = 1, publicationsPage = 1)
       case SetPage(tab, page) => tab match {
         case PhenotypesTab   => copy(phenotypesPage = page)
         case TaxaTab         => copy(taxaPage = page)
@@ -59,6 +70,8 @@ object FacetPage extends Component {
         case PublicationsTab => copy(publicationsPage = page)
       }
     }
+
+    def currentQuerySpec: QuerySpec = QuerySpec(selectedEntityPath.headOption, selectedQualityPath.headOption, selectedTaxonPath.headOption, selectedPublication, includeParts, includeHistoricalHomologs, includeSerialHomologs)
 
   }
 
@@ -71,15 +84,16 @@ object FacetPage extends Component {
   def view(store: Store[State, Action]): VNode = {
     val tablePageSize = 40
     val entityPath = store.map(_.selectedEntityPath).distinctUntilChanged
-    val entity = entityPath.map(_.headOption).distinctUntilChanged
+    val querySpecObs = store.map(_.currentQuerySpec).distinctUntilChanged
+    val entity = querySpecObs.map(_.entity).distinctUntilChanged
     val qualityPath = store.map(_.selectedQualityPath).distinctUntilChanged
-    val quality = qualityPath.map(_.headOption).distinctUntilChanged
+    val quality = querySpecObs.map(_.quality).distinctUntilChanged
     val entityTerm = entity.flatMap(e => Util.sequence(e.map(KBAPI.termLabel)))
     val qualityTerm = quality.flatMap(q => Util.sequence(q.map(KBAPI.termLabel)))
     val taxonPath = store.map(_.selectedTaxonPath).distinctUntilChanged
-    val taxon = taxonPath.map(_.headOption).distinctUntilChanged
+    val taxon = querySpecObs.map(_.taxon).distinctUntilChanged
     val taxonTerm = taxon.flatMap(t => Util.sequence(t.map(KBAPI.termLabel)))
-    val publication = store.map(_.selectedPublication).distinctUntilChanged
+    val publication = querySpecObs.map(_.publication).distinctUntilChanged
     val publicationTerm = publication.flatMap(p => Util.sequence(p.map(KBAPI.termLabel)))
     val activeTab = store.map(_.selectedTab).distinctUntilChanged
     val obsTaxonPage = store.map(_.taxaPage).distinctUntilChanged
@@ -93,25 +107,24 @@ object FacetPage extends Component {
       case PublicationsTab => "Publications"
     }
     def totalToPages(num: Int): Int = (num / tablePageSize.toDouble).ceil.toInt
-    val querySpecObs = entity.combineLatest(quality, taxon, publication)
     val phenotypesTotalObs = querySpecObs.flatMap {
-      case (e, q, t, p) =>
-        KBAPI.countTaxonPhenotypes(e, q, t, p, false, false, false).map(Option(_)).startWith(None)
+      case QuerySpec(e, q, t, p, parts, hist, serial) =>
+        KBAPI.countTaxonPhenotypes(e, q, t, p, parts, hist, serial).map(Option(_)).startWith(None)
     }
     val phenotypesTotalPagesObs = phenotypesTotalObs.map(_.map(totalToPages))
     val taxaTotalObs = querySpecObs.flatMap {
-      case (e, q, t, p) =>
-        KBAPI.countTaxaWithPhenotype(e, q, t, p, false, false, false).map(Option(_)).startWith(None)
+      case QuerySpec(e, q, t, p, parts, hist, serial) =>
+        KBAPI.countTaxaWithPhenotype(e, q, t, p, parts, hist, serial).map(Option(_)).startWith(None)
     }
     val taxaTotalPagesObs = taxaTotalObs.map(_.map(totalToPages))
     val annotationsTotalObs = querySpecObs.flatMap {
-      case (e, q, t, p) =>
-        KBAPI.countTaxonAnnotations(e, q, t, p, false, false, false).map(Option(_)).startWith(None)
+      case QuerySpec(e, q, t, p, parts, hist, serial) =>
+        KBAPI.countTaxonAnnotations(e, q, t, p, parts, hist, serial).map(Option(_)).startWith(None)
     }
     val annotationsTotalPagesObs = annotationsTotalObs.map(_.map(totalToPages))
     val publicationsTotalObs = querySpecObs.flatMap {
-      case (e, q, t, p) =>
-        KBAPI.countStudiesWithPhenotype(e, q, t, p, false, false, false).map(Option(_)).startWith(None)
+      case QuerySpec(e, q, t, p, parts, hist, serial) =>
+        KBAPI.countStudiesWithPhenotype(e, q, t, p, parts, hist, serial).map(Option(_)).startWith(None)
     }
     val publicationsTotalPagesObs = publicationsTotalObs.map(_.map(totalToPages))
     val currentPagesObs = store.map(s => Map[FacetTab, Int](
@@ -120,53 +133,60 @@ object FacetPage extends Component {
       AnnotationsTab -> s.annotationsPage,
       PublicationsTab -> s.publicationsPage)).distinctUntilChanged
     val tableWithData = activeTab.combineLatestWith(querySpecObs, currentPagesObs)(dataTable(_, _, _, tablePageSize))
-    val entityCountFn = activeTab.combineLatestWith(quality, taxon, publication) { (tab, q, t, p) =>
-      tab match {
-        case PhenotypesTab   => KBAPI.countTaxonPhenotypes(_: Option[IRI], q, t, p, false, false, false)
-        case TaxaTab         => KBAPI.countTaxaWithPhenotype(_: Option[IRI], q, t, p, false, false, false)
-        case AnnotationsTab  => KBAPI.countTaxonAnnotations(_: Option[IRI], q, t, p, false, false, false)
-        case PublicationsTab => KBAPI.countStudiesWithPhenotype(_: Option[IRI], q, t, p, false, false, false)
-      }
+    val entityCountFn = store.map(_.currentQuerySpec).map(spec => (spec.quality, spec.taxon, spec.publication, spec.includeParts, spec.includeHistoricalHomologs, spec.includeSerialHomologs)).distinctUntilChanged.combineLatestWith(activeTab) {
+      case ((q, t, p, parts, hist, serial), tab) =>
+        tab match {
+          case PhenotypesTab   => KBAPI.countTaxonPhenotypes(_: Option[IRI], q, t, p, parts, hist, serial)
+          case TaxaTab         => KBAPI.countTaxaWithPhenotype(_: Option[IRI], q, t, p, parts, hist, serial)
+          case AnnotationsTab  => KBAPI.countTaxonAnnotations(_: Option[IRI], q, t, p, parts, hist, serial)
+          case PublicationsTab => KBAPI.countStudiesWithPhenotype(_: Option[IRI], q, t, p, parts, hist, serial)
+        }
     }
-    val entityFacetFn = activeTab.combineLatestWith(quality, taxon, publication) { (tab, q, t, p) =>
-      tab match {
-        case PhenotypesTab   => KBAPI.facetTaxonPhenotypes("entity", _: Option[IRI], q, t, p, false, false, false)
-        case TaxaTab         => KBAPI.facetTaxaWithPhenotype("entity", _: Option[IRI], q, t, p, false, false, false)
-        case AnnotationsTab  => KBAPI.facetTaxonAnnotations("entity", _: Option[IRI], q, t, p, false, false, false)
-        case PublicationsTab => KBAPI.facetStudiesWithPhenotype("entity", _: Option[IRI], q, t, p, false, false, false)
-      }
+
+    val entityFacetFn = store.map(_.currentQuerySpec).map(spec => (spec.quality, spec.taxon, spec.publication, spec.includeParts, spec.includeHistoricalHomologs, spec.includeSerialHomologs)).distinctUntilChanged.combineLatestWith(activeTab) {
+      case ((q, t, p, parts, hist, serial), tab) =>
+        tab match {
+          case PhenotypesTab   => KBAPI.facetTaxonPhenotypes("entity", _: Option[IRI], q, t, p, parts, hist, serial)
+          case TaxaTab         => KBAPI.facetTaxaWithPhenotype("entity", _: Option[IRI], q, t, p, parts, hist, serial)
+          case AnnotationsTab  => KBAPI.facetTaxonAnnotations("entity", _: Option[IRI], q, t, p, parts, hist, serial)
+          case PublicationsTab => KBAPI.facetStudiesWithPhenotype("entity", _: Option[IRI], q, t, p, parts, hist, serial)
+        }
     }
-    val qualityCountFn = activeTab.combineLatestWith(entity, taxon, publication) { (tab, e, t, p) =>
-      tab match {
-        case PhenotypesTab   => KBAPI.countTaxonPhenotypes(e, _: Option[IRI], t, p, false, false, false)
-        case TaxaTab         => KBAPI.countTaxaWithPhenotype(e, _: Option[IRI], t, p, false, false, false)
-        case AnnotationsTab  => KBAPI.countTaxonAnnotations(e, _: Option[IRI], t, p, false, false, false)
-        case PublicationsTab => KBAPI.countStudiesWithPhenotype(e, _: Option[IRI], t, p, false, false, false)
-      }
+    val qualityCountFn = store.map(_.currentQuerySpec).map(spec => (spec.entity, spec.taxon, spec.publication, spec.includeParts, spec.includeHistoricalHomologs, spec.includeSerialHomologs)).distinctUntilChanged.combineLatestWith(activeTab) {
+      case ((e, t, p, parts, hist, serial), tab) =>
+        tab match {
+          case PhenotypesTab   => KBAPI.countTaxonPhenotypes(e, _: Option[IRI], t, p, parts, hist, serial)
+          case TaxaTab         => KBAPI.countTaxaWithPhenotype(e, _: Option[IRI], t, p, parts, hist, serial)
+          case AnnotationsTab  => KBAPI.countTaxonAnnotations(e, _: Option[IRI], t, p, parts, hist, serial)
+          case PublicationsTab => KBAPI.countStudiesWithPhenotype(e, _: Option[IRI], t, p, parts, hist, serial)
+        }
     }
-    val qualityFacetFn = activeTab.combineLatestWith(entity, taxon, publication) { (tab, e, t, p) =>
-      tab match {
-        case PhenotypesTab   => KBAPI.facetTaxonPhenotypes("quality", e, _: Option[IRI], t, p, false, false, false)
-        case TaxaTab         => KBAPI.facetTaxaWithPhenotype("quality", e, _: Option[IRI], t, p, false, false, false)
-        case AnnotationsTab  => KBAPI.facetTaxonAnnotations("quality", e, _: Option[IRI], t, p, false, false, false)
-        case PublicationsTab => KBAPI.facetStudiesWithPhenotype("quality", e, _: Option[IRI], t, p, false, false, false)
-      }
+    val qualityFacetFn = store.map(_.currentQuerySpec).map(spec => (spec.entity, spec.taxon, spec.publication, spec.includeParts, spec.includeHistoricalHomologs, spec.includeSerialHomologs)).distinctUntilChanged.combineLatestWith(activeTab) {
+      case ((e, t, p, parts, hist, serial), tab) =>
+        tab match {
+          case PhenotypesTab   => KBAPI.facetTaxonPhenotypes("quality", e, _: Option[IRI], t, p, parts, hist, serial)
+          case TaxaTab         => KBAPI.facetTaxaWithPhenotype("quality", e, _: Option[IRI], t, p, parts, hist, serial)
+          case AnnotationsTab  => KBAPI.facetTaxonAnnotations("quality", e, _: Option[IRI], t, p, parts, hist, serial)
+          case PublicationsTab => KBAPI.facetStudiesWithPhenotype("quality", e, _: Option[IRI], t, p, parts, hist, serial)
+        }
     }
-    val taxonCountFn = activeTab.combineLatestWith(entity, quality, publication) { (tab, e, q, p) =>
-      tab match {
-        case PhenotypesTab   => KBAPI.countTaxonPhenotypes(e, q, _: Option[IRI], p, false, false, false)
-        case TaxaTab         => KBAPI.countTaxaWithPhenotype(e, q, _: Option[IRI], p, false, false, false)
-        case AnnotationsTab  => KBAPI.countTaxonAnnotations(e, q, _: Option[IRI], p, false, false, false)
-        case PublicationsTab => KBAPI.countStudiesWithPhenotype(e, q, _: Option[IRI], p, false, false, false)
-      }
+    val taxonCountFn = store.map(_.currentQuerySpec).map(spec => (spec.entity, spec.quality, spec.publication, spec.includeParts, spec.includeHistoricalHomologs, spec.includeSerialHomologs)).distinctUntilChanged.combineLatestWith(activeTab) {
+      case ((e, q, p, parts, hist, serial), tab) =>
+        tab match {
+          case PhenotypesTab   => KBAPI.countTaxonPhenotypes(e, q, _: Option[IRI], p, parts, hist, serial)
+          case TaxaTab         => KBAPI.countTaxaWithPhenotype(e, q, _: Option[IRI], p, parts, hist, serial)
+          case AnnotationsTab  => KBAPI.countTaxonAnnotations(e, q, _: Option[IRI], p, parts, hist, serial)
+          case PublicationsTab => KBAPI.countStudiesWithPhenotype(e, q, _: Option[IRI], p, parts, hist, serial)
+        }
     }
-    val taxonFacetFn = activeTab.combineLatestWith(entity, quality, publication) { (tab, e, q, p) =>
-      tab match {
-        case PhenotypesTab   => KBAPI.facetTaxonPhenotypes("taxon", e, q, _: Option[IRI], p, false, false, false)
-        case TaxaTab         => KBAPI.facetTaxaWithPhenotype("taxon", e, q, _: Option[IRI], p, false, false, false)
-        case AnnotationsTab  => KBAPI.facetTaxonAnnotations("taxon", e, q, _: Option[IRI], p, false, false, false)
-        case PublicationsTab => KBAPI.facetStudiesWithPhenotype("taxon", e, q, _: Option[IRI], p, false, false, false)
-      }
+    val taxonFacetFn = store.map(_.currentQuerySpec).map(spec => (spec.entity, spec.quality, spec.publication, spec.includeParts, spec.includeHistoricalHomologs, spec.includeSerialHomologs)).distinctUntilChanged.combineLatestWith(activeTab) {
+      case ((e, q, p, parts, hist, serial), tab) =>
+        tab match {
+          case PhenotypesTab   => KBAPI.facetTaxonPhenotypes("taxon", e, q, _: Option[IRI], p, parts, hist, serial)
+          case TaxaTab         => KBAPI.facetTaxaWithPhenotype("taxon", e, q, _: Option[IRI], p, parts, hist, serial)
+          case AnnotationsTab  => KBAPI.facetTaxonAnnotations("taxon", e, q, _: Option[IRI], p, parts, hist, serial)
+          case PublicationsTab => KBAPI.facetStudiesWithPhenotype("taxon", e, q, _: Option[IRI], p, parts, hist, serial)
+        }
     }
     val setEntityPath = store.sink.redirectMap(SetEntityPath(_))
     val setQualityPath = store.sink.redirectMap(SetQualityPath(_))
@@ -193,9 +213,24 @@ object FacetPage extends Component {
             qualitySearch,
             taxonSearch,
             pubSearch)),
-        facetControls("anatomical entity", entityPath, entityCountFn, entityFacetFn, setEntityPath),
-        facetControls("phenotypic quality", qualityPath, qualityCountFn, qualityFacetFn, setQualityPath),
-        facetControls("taxonomic group", taxonPath, taxonCountFn, taxonFacetFn, setTaxonPath)),
+        facetControls("anatomical entity", entityPath, entityCountFn, entityFacetFn, setEntityPath)(Some(div(
+          cls := "form-inline",
+          div(
+            div(cls := "form-group", label("Include: ")),
+            div(cls := "checkbox", label(input(
+              tpe := "checkbox",
+              checked <-- store.map(_.includeParts),
+              inputChecked --> store.sink.redirectMap(SetIncludeParts)), " parts ")),
+            div(cls := "checkbox", label(input(
+              tpe := "checkbox",
+              checked <-- store.map(_.includeHistoricalHomologs),
+              inputChecked --> store.sink.redirectMap(SetIncludeHistoricalHomologs)), " historical homologs ")),
+            div(cls := "checkbox", label(input(
+              tpe := "checkbox",
+              checked <-- store.map(_.includeSerialHomologs),
+              inputChecked --> store.sink.redirectMap(SetIncludeSerialHomologs)), " serial homologs ")))))),
+        facetControls("phenotypic quality", qualityPath, qualityCountFn, qualityFacetFn, setQualityPath)(None),
+        facetControls("taxonomic group", taxonPath, taxonCountFn, taxonFacetFn, setTaxonPath)(None)),
       div(
         cls := "col-sm-8",
         ul(
@@ -223,24 +258,24 @@ object FacetPage extends Component {
         div(hidden <-- activeTab.map(_ != PublicationsTab), Views.pagination(obsPublicationsPage, store.redirectMap(SetPage(PublicationsTab, _)), publicationsTotalPagesObs.map(_.getOrElse(0))))))
   }
 
-  private def dataTable(tab: FacetTab, querySpec: (Option[Model.IRI], Option[Model.IRI], Option[Model.IRI], Option[Model.IRI]), currentPages: Map[FacetTab, Int], tableSize: Int): VNode = {
-    val (entity, quality, taxon, publication) = querySpec
+  private def dataTable(tab: FacetTab, querySpec: QuerySpec, currentPages: Map[FacetTab, Int], tableSize: Int): VNode = {
+    val QuerySpec(entity, quality, taxon, publication, parts, hist, serial) = querySpec
     def offset(page: Int) = tableSize * ((page - 1).max(0))
     val (header, rows) = tab match {
       case PhenotypesTab =>
-        val data = KBAPI.queryTaxonPhenotypes(entity, quality, taxon, publication, false, false, false, tableSize, offset(currentPages(PhenotypesTab))).startWith(Nil)
+        val data = KBAPI.queryTaxonPhenotypes(entity, quality, taxon, publication, parts, hist, serial, tableSize, offset(currentPages(PhenotypesTab))).startWith(Nil)
         (
           thead(tr(th("Phenotype"))),
           tbody(children <-- data.map(_.map(singleTermRow))))
       case TaxaTab =>
-        val data = KBAPI.queryTaxaWithPhenotype(entity, quality, taxon, publication, false, false, false, tableSize, offset(currentPages(TaxaTab))).startWith(Nil)
+        val data = KBAPI.queryTaxaWithPhenotype(entity, quality, taxon, publication, parts, hist, serial, tableSize, offset(currentPages(TaxaTab))).startWith(Nil)
         (
           thead(tr(
             th("Group"),
             th("Taxon"))),
           tbody(children <-- data.map(_.map(taxonRow))))
       case AnnotationsTab =>
-        val data = KBAPI.queryTaxonAnnotations(entity, quality, taxon, publication, false, false, false, tableSize, offset(currentPages(AnnotationsTab))).startWith(Nil)
+        val data = KBAPI.queryTaxonAnnotations(entity, quality, taxon, publication, parts, hist, serial, tableSize, offset(currentPages(AnnotationsTab))).startWith(Nil)
         (
           thead(tr(
             th("Group"),
@@ -249,11 +284,11 @@ object FacetPage extends Component {
             th("Source"))),
           tbody(children <-- data.map(_.map(taxonAnnotationRow))))
       case PublicationsTab =>
-        val data = KBAPI.queryStudiesWithPhenotype(entity, quality, taxon, publication, false, false, false, tableSize, offset(currentPages(PublicationsTab))).startWith(Nil)
+        val data = KBAPI.queryStudiesWithPhenotype(entity, quality, taxon, publication, parts, hist, serial, tableSize, offset(currentPages(PublicationsTab))).startWith(Nil)
         (
           thead(tr(
             th("Publication"))),
-          tbody(children <-- data.map(_.map(singleTermRow))))
+          tbody(children <-- data.map(_.map(publicationRow))))
     }
     table(
       cls := "table table-condensed table-striped", header, rows)
@@ -289,7 +324,11 @@ object FacetPage extends Component {
       td(annotation.source.label))
   }
 
-  private def facetControls(title: String, focusItemPath: Observable[List[IRI]], countFunc: Observable[CountFn], facetFunc: Observable[FacetFn], newFocus: Sink[List[IRI]]): VNode = {
+  private def publicationRow(term: Term): VNode = {
+    tr(td(Popover.popup(Views.publicationInfoView(term.iri), "auto", "focus")(term.label)))
+  }
+
+  private def facetControls(title: String, focusItemPath: Observable[List[IRI]], countFunc: Observable[CountFn], facetFunc: Observable[FacetFn], newFocus: Sink[List[IRI]])(accessoryView: Option[VNode]): VNode = {
     val facetPathPaths = focusItemPath.map { list =>
       list.reverse.scanLeft(List.empty[IRI])((path, term) => term :: path).drop(1)
     }
@@ -320,6 +359,7 @@ object FacetPage extends Component {
         h4(cls := "panel-title", title.capitalize)),
       div(
         cls := "panel-body",
+        div(cls := "facet-accessory", accessoryView.getOrElse(div())),
         div(cls := "facet-line", a(role := "button", cls <-- anyCSSClass, click(Nil) --> newFocus, s"Any $title"), " ", span(cls := "badge", child <-- anyCount)),
         div(children <-- facetPathElements),
         div(children <-- facetChildElements),

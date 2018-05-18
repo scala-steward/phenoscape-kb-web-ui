@@ -43,6 +43,8 @@ object KBAPI {
       "type" -> Vocab.CharacterStateDataMatrix)
     get[ResultList[Term]](s"$api/term/search?${toQuery(params)}").map(_.results)
   }
+  
+  def studyInfo(iri: IRI): Observable[Study] = get[Study](s"$api/study?iri=${enc(iri.id)}")
 
   def queryTaxaWithPhenotype(entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], publication: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean, limit: Int, offset: Int): Observable[List[Term]] = {
     val params = Map[String, Any](

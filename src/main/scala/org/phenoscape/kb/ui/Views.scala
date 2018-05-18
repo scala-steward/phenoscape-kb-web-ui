@@ -53,6 +53,15 @@ object Views {
         dt("ID"), dd(Vocab.compact(iri).id)))
   }
 
+  def publicationInfoView(iri: IRI): VNode = {
+    val study = KBAPI.studyInfo(iri)
+    div(
+      h4(child <-- study.map(_.label)),
+      dl(
+        dt("Citation"), dd(child <-- study.map(_.citation)),
+        dt("ID"), dd(Vocab.compact(iri).id)))
+  }
+
   def pagination(currentPage: Observable[Int], newPage: Sink[Int], totalPages: Observable[Int]): VNode = {
     val onFirstPage = currentPage.map(_ == 1)
     val firstAndPreviousClasses = Util.observableCSS(onFirstPage.map("disabled" -> _))
@@ -67,7 +76,7 @@ object Views {
         li(cls <-- nextAndLastClasses, a(role := "button", click(currentPage.map(_ + 1)) --> newPage, "Next")),
         li(cls <-- nextAndLastClasses, a(role := "button", click(totalPages) --> newPage, "Last"))))
   }
-  
+
   val loading: VNode = img(src := "img/ajax-loader.gif") //FIXME verify path
 
   def autocompleteField[T](search: String => Observable[List[T]], selection: Observable[Option[T]], show: T => String, makeSelection: Sink[Option[T]], placeholderText: Option[String]): VNode = {

@@ -22,7 +22,10 @@ object Vocab {
     "TAXRANK" -> "http://purl.obolibrary.org/obo/TAXRANK_",
     "UBERON" -> "http://purl.obolibrary.org/obo/UBERON_",
     "PATO" -> "http://purl.obolibrary.org/obo/PATO_",
-    "ZFIN" -> "http://zfin.org/")
+    "ZFIN" -> "http://zfin.org/",
+    "DOI" -> "http://dx.doi.org/",
+    "HDL" -> "http://hdl.handle.net/",
+    "JSTOR" -> "http://www.jstor.org/stable/")
 
   val synonymTypes: Map[IRI, String] = Map(
     IRI("http://www.geneontology.org/formats/oboInOwl#hasExactSynonym") -> "exact",
