@@ -266,7 +266,9 @@ object FacetPage extends Component {
         val data = KBAPI.queryTaxonPhenotypes(entity, quality, taxon, publication, parts, hist, serial, tableSize, offset(currentPages(PhenotypesTab))).startWith(Nil)
         (
           thead(tr(th("Phenotype"))),
-          tbody(children <-- data.map(_.map(singleTermRow))))
+          tbody(
+            cls := "striped",
+            children <-- data.map(_.map(singleTermRow))))
       case TaxaTab =>
         val data = KBAPI.queryTaxaWithPhenotype(entity, quality, taxon, publication, parts, hist, serial, tableSize, offset(currentPages(TaxaTab))).startWith(Nil)
         (
@@ -292,7 +294,9 @@ object FacetPage extends Component {
         (
           thead(tr(
             th("Publication"))),
-          tbody(children <-- data.map(_.map(publicationRow))))
+          tbody(
+            cls := "striped",
+            children <-- data.map(_.map(publicationRow))))
     }
     table(
       cls := "table table-condensed", header, rows)
