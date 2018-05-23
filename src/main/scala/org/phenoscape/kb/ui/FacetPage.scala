@@ -12,6 +12,7 @@ import outwatch.dom.VNode
 import outwatch.redux.Component
 import outwatch.redux.Store
 import rxscalajs.Observable
+import org.phenoscape.kb.ui.Model.AnnotationSource
 
 object FacetPage extends Component {
 
@@ -272,7 +273,9 @@ object FacetPage extends Component {
           thead(tr(
             th("Group"),
             th("Taxon"))),
-          tbody(children <-- data.map(_.map(taxonRow))))
+          tbody(
+            cls := "striped",
+            children <-- data.map(_.map(taxonRow))))
       case AnnotationsTab =>
         val data = KBAPI.queryTaxonAnnotations(entity, quality, taxon, publication, parts, hist, serial, tableSize, offset(currentPages(AnnotationsTab))).startWith(Nil)
         (
@@ -280,8 +283,10 @@ object FacetPage extends Component {
             th("Group"),
             th("Taxon"),
             th("Phenotype"),
-            th("Source"))),
-          tbody(children <-- data.map(_.map(taxonAnnotationRow))))
+            th("Sources"))),
+          tbody(
+            cls := "sibling-striped",
+            children <-- data.map(_.map(taxonAnnotationRow).flatten)))
       case PublicationsTab =>
         val data = KBAPI.queryStudiesWithPhenotype(entity, quality, taxon, publication, parts, hist, serial, tableSize, offset(currentPages(PublicationsTab))).startWith(Nil)
         (
@@ -290,7 +295,7 @@ object FacetPage extends Component {
           tbody(children <-- data.map(_.map(publicationRow))))
     }
     table(
-      cls := "table table-condensed table-striped", header, rows)
+      cls := "table table-condensed", header, rows)
   }
 
   private def singleTermRow(term: Term): VNode = {
@@ -305,22 +310,50 @@ object FacetPage extends Component {
         img(src := thumbnail))
     } //FIXME repeated code with similarity page
     tr(
+      cls := "striped",
       td(child <-- group),
       td(Popover.popup(Views.termInfoView(term.iri), "auto", "focus")(child <-- taxonName.startWith(term.label))))
   }
 
-  private def taxonAnnotationRow(annotation: TaxonAnnotation): VNode = {
+  private def taxonAnnotationRow(annotation: TaxonAnnotation): Seq[VNode] = {
     val taxonName = KBAPI.taxon(annotation.taxon.iri).map(Views.taxonName)
     val group = KBAPI.taxonCommonGroup(annotation.taxon.iri).map { grp =>
       val thumbnail = Util.taxonThumbnailIRI(grp.phylopic).id
       span(Popover.simplePopover, cls := "common-taxon-group", data.toggle := "popover", data.trigger := "hover", data.placement := "right", data.content := grp.label,
         img(src := thumbnail))
     } //FIXME repeated code with similarity page
-    tr(
-      td(child <-- group),
-      td(Popover.popup(Views.termInfoView(annotation.taxon.iri), "auto", "focus")(child <-- taxonName.startWith(annotation.taxon.label))),
-      td(annotation.phenotype.label),
-      td(annotation.source.label))
+    val siblingToggleClickHandler = createHandler[Unit]()
+    val innerView = siblingToggleClickHandler.first.map(_ => KBAPI.annotationSources(annotation).map(_.map(annotationSourceView))).flatten
+    val shouldHideSiblingView = siblingToggleClickHandler.scan(0)((a, b) => a + 1).map(i => (i % 2) == 0).startWith(true)
+    Seq(
+      tr(
+        cls := "striped",
+        td(child <-- group),
+        td(Popover.popup(Views.termInfoView(annotation.taxon.iri), "auto", "focus")(child <-- taxonName.startWith(annotation.taxon.label))),
+        td(annotation.phenotype.label),
+        td(a(
+          role := "button",
+          click(()) --> siblingToggleClickHandler,
+          span(cls := "glyphicon glyphicon-list-alt")))),
+      tr(
+        hidden <-- shouldHideSiblingView,
+        td(
+          colspan := 4,
+          div(
+            cls := "well",
+            h4("Source data"),
+            div(children <-- innerView)))))
+  }
+
+  private def annotationSourceView(as: AnnotationSource): VNode = {
+    div(
+      h5(Popover.popup(Views.publicationInfoView(as.study.iri), "auto", "focus")(as.study.label)),
+      dl(
+        cls := "dl-horizontal",
+        dt(s"Character ${as.characterNum}:"),
+        dd(as.characterText),
+        dt("State:"),
+        dd(as.stateText)))
   }
 
   private def publicationRow(term: Term): VNode = {

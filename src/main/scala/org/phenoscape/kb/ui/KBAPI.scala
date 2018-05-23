@@ -43,7 +43,7 @@ object KBAPI {
       "type" -> Vocab.CharacterStateDataMatrix)
     get[ResultList[Term]](s"$api/term/search?${toQuery(params)}").map(_.results)
   }
-  
+
   def studyInfo(iri: IRI): Observable[Study] = get[Study](s"$api/study?iri=${enc(iri.id)}")
 
   def queryTaxaWithPhenotype(entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], publication: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean, limit: Int, offset: Int): Observable[List[Term]] = {
@@ -203,6 +203,11 @@ object KBAPI {
       .add(publication.map("publication" -> _.id))
     get[ResultList[Facet]](s"$api/study/facet/$facet?${toQuery(params)}").map(_.results)
   }
+
+  def annotationSources(taxon: IRI, phenotype: IRI): Observable[List[AnnotationSource]] =
+    get[ResultList[AnnotationSource]](s"$api/taxon/annotation/sources?taxon=${enc(taxon.id)}&phenotype=${enc(phenotype.id)}").map(_.results)
+    
+  def annotationSources(annotation: TaxonAnnotation): Observable[List[AnnotationSource]] = annotationSources(annotation.taxon.iri, annotation.phenotype.iri)
 
   def similarityMatches(subject: IRI, corpusGraph: IRI, limit: Int, offset: Int): Observable[ResultList[SimilarityMatch]] = {
     val params = Map(

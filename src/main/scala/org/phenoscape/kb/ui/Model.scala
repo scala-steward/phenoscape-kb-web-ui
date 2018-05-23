@@ -61,11 +61,19 @@ object Model {
 
   }
 
-  final case class TaxonAnnotation(taxon: Term, phenotype: Term, source: Term)
+  final case class TaxonAnnotation(taxon: Term, phenotype: Term)
 
   object TaxonAnnotation {
 
-    implicit val decoder: Decoder[TaxonAnnotation] = Decoder.forProduct3("taxon", "phenotype", "study")(TaxonAnnotation.apply)
+    implicit val decoder: Decoder[TaxonAnnotation] = Decoder.forProduct2("taxon", "phenotype")(TaxonAnnotation.apply)
+
+  }
+
+  final case class AnnotationSource(study: Term, characterNum: Int, characterText: String, stateText: String)
+
+  object AnnotationSource {
+
+    implicit val decoder: Decoder[AnnotationSource] = Decoder.forProduct4("publication", "character_num", "character_text", "state_text")(AnnotationSource.apply)
 
   }
 
