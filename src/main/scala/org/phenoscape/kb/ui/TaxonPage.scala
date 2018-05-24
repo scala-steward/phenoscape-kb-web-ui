@@ -58,7 +58,6 @@ object TaxonPage extends Component {
         dt("Children:"),
         dd((if (children.nonEmpty) children else List(i("None"))): _*))
     }
-    val res = KBRouter.set(KBRouter.FacetURL)
 
     div(
       h2(

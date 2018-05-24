@@ -92,7 +92,7 @@ object Home extends Component {
               "."))),
           examplePanel(
             "Download a character matrix of presence/absence inferred knowledge",
-            p("Configure a NeXML character matrix download for any type of anatomical structure and taxonomic group using the ", a(href := " #/ ontotrace", "OntoTrace page"), "."),
+            p("Configure a NeXML character matrix download for any type of anatomical structure and taxonomic group using the ", a(href := "#/ontotrace", "OntoTrace page"), "."),
             p(i(
               "For example, you can create a ",
               a(
