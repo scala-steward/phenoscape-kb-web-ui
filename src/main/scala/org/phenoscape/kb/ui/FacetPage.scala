@@ -316,7 +316,7 @@ object FacetPage extends Component {
     tr(
       cls := "striped",
       td(child <-- group),
-      td(Popover.popup(Views.termInfoView(term.iri), "auto", "focus")(child <-- taxonName.startWith(term.label))))
+      td(Popover.popup(Views.taxonInfoView(term.iri), "auto", "focus")(child <-- taxonName.startWith(term.label))))
   }
 
   private def taxonAnnotationRow(annotation: TaxonAnnotation): Seq[VNode] = {
@@ -333,7 +333,7 @@ object FacetPage extends Component {
       tr(
         cls := "striped",
         td(child <-- group),
-        td(Popover.popup(Views.termInfoView(annotation.taxon.iri), "auto", "focus")(child <-- taxonName.startWith(annotation.taxon.label))),
+        td(Popover.popup(Views.taxonInfoView(annotation.taxon.iri), "auto", "focus")(child <-- taxonName.startWith(annotation.taxon.label))),
         td(annotation.phenotype.label),
         td(a(
           role := "button",

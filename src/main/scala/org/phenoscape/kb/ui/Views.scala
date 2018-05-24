@@ -53,6 +53,31 @@ object Views {
         dt("ID"), dd(Vocab.compact(iri).id)))
   }
 
+  def entityInfoView(iri: IRI): VNode = {
+    val term = KBAPI.termInfo(iri)
+    div(
+      h4(child <-- term.map(_.term.label)),
+      dl(
+        dt("Synonyms"), dd(child <-- term.map(t => formatSynonyms(t.synonyms))),
+        dt("Definition"), dd(child <-- term.map(_.definition.getOrElse(i("None")))),
+        dt("ID"), dd(Vocab.compact(iri).id)),
+      p(a(
+        href := s"#/entity/${Vocab.compact(iri).id}",
+        s"View details for ", span(child <-- term.map(_.term.label)))))
+  }
+
+  def taxonInfoView(iri: IRI): VNode = {
+    val term = KBAPI.taxon(iri)
+    div(
+      h4(child <-- term.map(taxonName)),
+      dl(
+        //dt("Synonyms"), dd(child <-- term.map(t => formatSynonyms(t.))), //FIXME add synonyms to taxon model
+        dt("ID"), dd(Vocab.compact(iri).id)),
+      p(a(
+        href := s"#/taxon/${Vocab.compact(iri).id}",
+        s"View details for ", span(child <-- term.map(taxonName)))))
+  }
+
   def publicationInfoView(iri: IRI): VNode = {
     val study = KBAPI.studyInfo(iri)
     div(
