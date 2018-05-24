@@ -1,11 +1,11 @@
 package org.phenoscape.kb.ui
 
 import org.phenoscape.kb.ui.Model.IRI
+import org.phenoscape.kb.ui.Model.Relation
 import org.phenoscape.kb.ui.Model.Term
-import org.phenoscape.kb.ui.Model.Taxon
-import org.phenoscape.kb.ui.Views.taxonName
 import org.phenoscape.kb.ui.Vocab._
 
+import outwatch.dom.VDomModifier.StringNode
 import outwatch.dom.VNode
 import outwatch.redux.Component
 import outwatch.redux.Store
@@ -33,6 +33,18 @@ object EntityPage extends Component {
 
     val obsTermInfo: Observable[Model.TermInfo] = store.flatMap(s => KBAPI.termInfo(s.entityIRI))
     val obsClassificationData = store.flatMap(s => KBAPI.classification(s.entityIRI, IRI(Uberon)))
+    val relationDLNodes = for {
+      classification <- obsClassificationData
+      termInfo <- obsTermInfo
+    } yield {
+      val isaRelations = classification.subClassOf.map(superclass => Relation(Term(IRI(RDFSSubClassOf), "is a type of"), superclass))
+      (termInfo.relationships ::: isaRelations).groupBy(_.property).flatMap {
+        case (property, relations) =>
+          val relationsList = Util.interpolate(StringNode(", "), relations.sortBy(_.value.label.toLowerCase).map(relation =>
+            Popover.popup(Views.entityInfoView(relation.value.iri), "auto", "focus")(relation.value.label)))
+          List(dt(property.label, ":"), dd(relationsList: _*))
+      }.toSeq
+    }
     def termLink(term: Term) = a(href := s"#/entity/${Vocab.compact(term.iri).id}", term.label)
 
     div(
@@ -44,12 +56,23 @@ object EntityPage extends Component {
           a(href <-- store.map(_.entityIRI.id), target := "_blank", cls := "link-no-color",
             child <-- store.map(s => Vocab.compact(s.entityIRI).id)))),
       div(
-        dl(
-          dt("Synonyms:"), dd(child <-- obsTermInfo.map(t => Views.formatSynonyms(t.synonyms))),
-          dt("Definition:"), dd(child <-- obsTermInfo.map(_.definition.getOrElse(i("None")))))),
-      div(
-        cls := "panel panel-default top-buffer",
-        div(cls := "panel-body", child <-- obsClassificationData.map(Views.classification(_, termLink)))))
+        cls := "row",
+        div(
+          cls := "col-sm-3",
+          div(
+            cls := "panel panel-default top-buffer",
+            div(cls := "panel-body", child <-- obsClassificationData.map(Views.classification(_, termLink))))),
+        div(
+          cls := "col-sm-9",
+          div(
+            cls := "top-buffer",
+            h3("Properties"),
+            dl(
+              dt("Synonyms:"), dd(child <-- obsTermInfo.map(t => Views.formatSynonyms(t.synonyms))),
+              dt("Definition:"), dd(child <-- obsTermInfo.map(_.definition.getOrElse(i("None"))))),
+            h3("Relationships"),
+            dl(children <-- relationDLNodes),
+            h3("Data in the Knowledgebase")))))
   }
 
 }

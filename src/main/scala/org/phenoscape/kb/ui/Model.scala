@@ -28,14 +28,16 @@ object Model {
 
   }
 
-  final case class TermInfo(term: Term, definition: Option[String], synonyms: List[(IRI, String)])
+  final case class TermInfo(term: Term, definition: Option[String], synonyms: List[(IRI, String)], relationships: List[Relation])
 
   object TermInfo {
 
-    implicit val decoder: Decoder[TermInfo] = Decoder.forProduct4("@id", "label", "definition", "synonyms") { (id: String, label: String, definition: Option[String], synonyms: List[Map[String, String]]) =>
-      TermInfo(Term(IRI(id), label), definition.filterNot(_.isEmpty), synonyms.map { case syn => IRI(syn("property")) -> syn("value") })
+    implicit val decoder: Decoder[TermInfo] = Decoder.forProduct5("@id", "label", "definition", "synonyms", "relationships") { (id: String, label: String, definition: Option[String], synonyms: List[Map[String, String]], relationships: List[Relation]) =>
+      TermInfo(Term(IRI(id), label), definition.filterNot(_.isEmpty), synonyms.map { case syn => IRI(syn("property")) -> syn("value") }, relationships)
     }
   }
+  
+  final case class Relation(property: Term, value: Term)
 
   final case class Taxon(iri: IRI, label: String, commonName: Option[String], extinct: Boolean, rank: Option[Term])
 
