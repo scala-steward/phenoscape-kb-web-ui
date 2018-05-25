@@ -1,13 +1,16 @@
 package org.phenoscape.kb.ui
 
 import scala.scalajs.js.JSApp
+import scala.scalajs.js.URIUtils.decodeURIComponent
 
 import Model.Curie
+import Model.IRI
+import QueryParams._
+import cats.data.Validated.Invalid
 import outwatch.dom._
 import outwatch.router.BaseUrl
 import outwatch.router.Router
 import rxscalajs.Observable
-import cats.data.Validated.Invalid
 
 object App extends JSApp {
 
@@ -24,6 +27,35 @@ object App extends JSApp {
     case class EntityURL(id: String) extends Page
     case class GeneSimilarityURL(id: String) extends Page
     object FacetURL extends Page
+    case class FacetURLP(params: String) extends Page with ParameterizedURL {
+
+      def tab: FacetPage.FacetTab = param("tab").collect(FacetURLP.keyToTab).getOrElse(FacetPage.TaxaTab)
+
+      def entity: Option[IRI] = param("entity").map(e => Vocab.expand(Curie(e)))
+      def quality: Option[IRI] = param("quality").map(e => Vocab.expand(Curie(e)))
+      def taxon: Option[IRI] = param("taxon").map(e => Vocab.expand(Curie(e)))
+      def pub: Option[IRI] = param("pub").map(e => Vocab.expand(Curie(e)))
+
+    }
+    object FacetURLP {
+
+      val tabToKey: Map[FacetPage.FacetTab, String] = Map(
+        FacetPage.TaxaTab -> "taxa",
+        FacetPage.PhenotypesTab -> "phenotypes",
+        FacetPage.AnnotationsTab -> "taxonannotations",
+        FacetPage.PublicationsTab -> "publications")
+      val keyToTab: Map[String, FacetPage.FacetTab] = tabToKey.map(_.swap)
+
+      def urlForState(state: FacetPage.State): String = {
+        val params = Map[String, Any]("tab" -> tabToKey(state.selectedTab))
+          .add(state.selectedEntityPath.headOption.map(x => "entity" -> Vocab.compact(x).id))
+          .add(state.selectedQualityPath.headOption.map(x => "quality" -> Vocab.compact(x).id))
+          .add(state.selectedTaxonPath.headOption.map(x => "taxon" -> Vocab.compact(x).id))
+          .add(state.selectedPublication.map(x => "pub" -> Vocab.compact(x).id))
+        s"#/facet${toQueryQ(params)}"
+      }
+
+    }
     object OntotraceURL extends Page
 
     val baseUrl: BaseUrl = BaseUrl.until_# + "#"
@@ -39,10 +71,25 @@ object App extends JSApp {
         ("/taxon" / string(".+")).caseClass[TaxonURL] ~> { case TaxonURL(id) => TaxonPage(TaxonPage.State(Vocab.expand(Curie(id)))) },
         ("/entity" / string(".+")).caseClass[EntityURL] ~> { case EntityURL(id) => EntityPage(EntityPage.State(Vocab.expand(Curie(id)))) },
         ("/similarity/gene" / string(".+")).caseClass[GeneSimilarityURL] ~> { case GeneSimilarityURL(id) => GeneTaxonSimilarityPage(GeneTaxonSimilarityPage.State(Vocab.expand(Curie(id)), None)) },
+        ("/facet?" ~ remainingPathOrBlank).caseClass[FacetURLP] ~> (params => FacetPage(FacetPage.State(params.tab, params.entity.toList, params.quality.toList, params.taxon.toList, params.pub, false, false, false))),
         "/facet".const(FacetURL) ~> FacetPage(FacetPage.State(FacetPage.TaxaTab, Nil, Nil, Nil, None, false, false, false)),
         "/ontotrace".const(OntotraceURL) ~> OntoTracePage(OntoTracePage.State(OntoTracePage.SimpleMode, None, None, false, false, Invalid(None), Invalid(None))))
         .notFound(Redirect(HomePage, replace = true))
     }
+  }
+
+  trait ParameterizedURL {
+
+    def params: String
+
+    private lazy val keyValues: Map[String, String] = params.split("&", -1).map { kv =>
+      val parts = kv.split("=", 2).filter(_.nonEmpty)
+      if (parts.size == 2) Some(parts(0) -> decodeURIComponent(parts(1)))
+      else None
+    }.filter(_.nonEmpty).flatten.toMap
+
+    def param(key: String): Option[String] = keyValues.get(key)
+
   }
 
 }

@@ -1,17 +1,15 @@
 package org.phenoscape.kb.ui
 
+import org.phenoscape.kb.ui.App.KBRouter.FacetURLP
 import org.phenoscape.kb.ui.Model.IRI
 import org.phenoscape.kb.ui.Model.Term
-import org.phenoscape.kb.ui.Model.Taxon
 import org.phenoscape.kb.ui.Views.taxonName
 import org.phenoscape.kb.ui.Vocab._
 
+import outwatch.dom.VDomModifier.StringNode
 import outwatch.dom.VNode
 import outwatch.redux.Component
 import outwatch.redux.Store
-import rxscalajs.Observable
-import outwatch.dom.VDomModifier.StringNode
-import org.phenoscape.kb.ui.App.KBRouter
 
 object TaxonPage extends Component {
 
@@ -35,9 +33,10 @@ object TaxonPage extends Component {
   def view(store: Store[State, Action]): VNode = {
     import outwatch.dom._
 
-    val obsTaxon = store.flatMap(s => KBAPI.taxon(s.taxonIRI))
-    val obsTermInfo = store.flatMap(s => KBAPI.termInfo(s.taxonIRI))
-    val obsClassificationData = store.flatMap(s => KBAPI.classification(s.taxonIRI, IRI(VTO)))
+    val taxonIRIObs = store.map(_.taxonIRI).distinctUntilChanged
+    val obsTaxon = taxonIRIObs.flatMap(t => KBAPI.taxon(t))
+    val obsTermInfo = taxonIRIObs.flatMap(t => KBAPI.termInfo(t))
+    val obsClassificationData = taxonIRIObs.flatMap(t => KBAPI.classification(t, IRI(VTO)))
     def taxonTermToView(term: Term) = a(
       href := s"#/taxon/${Vocab.compact(term.iri).id}",
       child <-- KBAPI.taxon(term.iri).map(Views.taxonName))
@@ -58,6 +57,10 @@ object TaxonPage extends Component {
         dt("Children:"),
         dd((if (children.nonEmpty) children else List(i("None"))): _*))
     }
+    val taxaLink = taxonIRIObs.map(t => FacetURLP.urlForState(FacetPage.State(FacetPage.TaxaTab, Nil, Nil, List(t), None, false, false, false)))
+    val taxonAnnotationsLink = taxonIRIObs.map(t => FacetURLP.urlForState(FacetPage.State(FacetPage.AnnotationsTab, Nil, Nil, List(t), None, false, false, false)))
+    val phenotypesLink = taxonIRIObs.map(t => FacetURLP.urlForState(FacetPage.State(FacetPage.PhenotypesTab, Nil, Nil, List(t), None, false, false, false)))
+    val pubsLink = taxonIRIObs.map(t => FacetURLP.urlForState(FacetPage.State(FacetPage.PublicationsTab, Nil, Nil, List(t), None, false, false, false)))
 
     div(
       h2(
@@ -86,7 +89,10 @@ object TaxonPage extends Component {
             h3("Relationships"),
             div(child <-- relationshipsDL),
             h3("Data in the Knowledgebase"),
-            a()))))
+            p(a(href <-- taxaLink, "Taxa in this group with phenotypes")),
+            p(a(href <-- taxonAnnotationsLink, "Taxon phenotype annotations")),
+            p(a(href <-- phenotypesLink, "Phenotypes annotated to taxa within this group")),
+            p(a(href <-- pubsLink, "Related publications"))))))
   }
 
 }

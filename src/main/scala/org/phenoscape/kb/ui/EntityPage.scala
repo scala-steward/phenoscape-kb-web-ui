@@ -1,5 +1,6 @@
 package org.phenoscape.kb.ui
 
+import org.phenoscape.kb.ui.App.KBRouter.FacetURLP
 import org.phenoscape.kb.ui.Model.IRI
 import org.phenoscape.kb.ui.Model.Relation
 import org.phenoscape.kb.ui.Model.Term
@@ -30,9 +31,9 @@ object EntityPage extends Component {
 
   def view(store: Store[State, Action]): VNode = {
     import outwatch.dom._
-
-    val obsTermInfo: Observable[Model.TermInfo] = store.flatMap(s => KBAPI.termInfo(s.entityIRI))
-    val obsClassificationData = store.flatMap(s => KBAPI.classification(s.entityIRI, IRI(Uberon)))
+    val entityIRIObs = store.map(_.entityIRI).distinctUntilChanged
+    val obsTermInfo: Observable[Model.TermInfo] = entityIRIObs.flatMap(e => KBAPI.termInfo(e))
+    val obsClassificationData = entityIRIObs.flatMap(e => KBAPI.classification(e, IRI(Uberon)))
     val relationDLNodes = for {
       classification <- obsClassificationData
       termInfo <- obsTermInfo
@@ -45,6 +46,10 @@ object EntityPage extends Component {
           List(dt(property.label, ":"), dd(relationsList: _*))
       }.toSeq
     }
+    val taxaLink = entityIRIObs.map(e => FacetURLP.urlForState(FacetPage.State(FacetPage.TaxaTab, List(e), Nil, Nil, None, false, false, false)))
+    val taxonAnnotationsLink = entityIRIObs.map(e => FacetURLP.urlForState(FacetPage.State(FacetPage.AnnotationsTab, List(e), Nil, Nil, None, false, false, false)))
+    val phenotypesLink = entityIRIObs.map(e => FacetURLP.urlForState(FacetPage.State(FacetPage.PhenotypesTab, List(e), Nil, Nil, None, false, false, false)))
+    val pubsLink = entityIRIObs.map(e => FacetURLP.urlForState(FacetPage.State(FacetPage.PublicationsTab, List(e), Nil, Nil, None, false, false, false)))
     def termLink(term: Term) = a(href := s"#/entity/${Vocab.compact(term.iri).id}", term.label)
 
     div(
@@ -72,7 +77,11 @@ object EntityPage extends Component {
               dt("Definition:"), dd(child <-- obsTermInfo.map(_.definition.getOrElse(i("None"))))),
             h3("Relationships"),
             dl(children <-- relationDLNodes),
-            h3("Data in the Knowledgebase")))))
+            h3("Data in the Knowledgebase"),
+            p(a(href <-- taxaLink, "Taxa with related phenotypes")),
+            p(a(href <-- taxonAnnotationsLink, "Taxon phenotype annotations")),
+            p(a(href <-- phenotypesLink, "Related phenotypes")),
+            p(a(href <-- pubsLink, "Related publications"))))))
   }
 
 }

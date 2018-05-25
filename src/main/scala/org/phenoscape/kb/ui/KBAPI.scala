@@ -3,6 +3,7 @@ package org.phenoscape.kb.ui
 import scala.scalajs.js.URIUtils.encodeURIComponent
 
 import org.phenoscape.kb.ui.Model._
+import org.phenoscape.kb.ui.QueryParams._
 
 import io.circe._
 import io.circe.parser._
@@ -206,7 +207,7 @@ object KBAPI {
 
   def annotationSources(taxon: IRI, phenotype: IRI): Observable[List[AnnotationSource]] =
     get[ResultList[AnnotationSource]](s"$api/taxon/annotation/sources?taxon=${enc(taxon.id)}&phenotype=${enc(phenotype.id)}").map(_.results)
-    
+
   def annotationSources(annotation: TaxonAnnotation): Observable[List[AnnotationSource]] = annotationSources(annotation.taxon.iri, annotation.phenotype.iri)
 
   def similarityMatches(subject: IRI, corpusGraph: IRI, limit: Int, offset: Int): Observable[ResultList[SimilarityMatch]] = {
@@ -267,20 +268,6 @@ object KBAPI {
     decoded
   }).collect { case Right(value) => value }
 
-  private def toQuery(params: Map[String, Any]): String = (params.map {
-    case (key, value) =>
-      s"$key=${enc(value.toString)}"
-  }).toSeq.sorted.mkString("&")
-
   private final case class Total(total: Int)
-
-  private implicit class OptionMap[K, V](val self: Map[K, V]) extends AnyVal {
-
-    def add(optionalItem: Option[(K, V)]): Map[K, V] = optionalItem match {
-      case Some(item) => self + item
-      case None       => self
-    }
-
-  }
 
 }
