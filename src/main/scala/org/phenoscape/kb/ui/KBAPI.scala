@@ -87,6 +87,40 @@ object KBAPI {
     get[ResultList[Facet]](s"$api/taxon/facet/phenotype/$facet?${toQuery(params)}").map(_.results)
   }
 
+  def queryGenesWithPhenotype(entity: Option[IRI], quality: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean, limit: Int, offset: Int): Observable[List[Term]] = {
+    val params = Map[String, Any](
+      "parts" -> parts,
+      "historical_homologs" -> historicalHomologs,
+      "serial_homologs" -> serialHomologs,
+      "limit" -> limit,
+      "offset" -> offset)
+      .add(entity.map("iri" -> _.id))
+      .add(quality.map("quality" -> _.id))
+    get[ResultList[Term]](s"$api/gene/affecting_entity_phenotype?${toQuery(params)}").map(_.results)
+  }
+
+  def countGenesWithPhenotype(entity: Option[IRI], quality: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean): Observable[Int] = {
+    val params = Map[String, Any](
+      "parts" -> parts,
+      "historical_homologs" -> historicalHomologs,
+      "serial_homologs" -> serialHomologs,
+      "total" -> true)
+      .add(entity.map("iri" -> _.id))
+      .add(quality.map("quality" -> _.id))
+    get[Total](s"$api/gene/affecting_entity_phenotype?${toQuery(params)}").map(_.total)
+  }
+
+  def facetGenesWithPhenotype(facet: String, entity: Option[IRI], quality: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean): Observable[List[Facet]] = {
+    //FIXME turn 'facet' into enum
+    val params = Map[String, Any](
+      "parts" -> parts,
+      "historical_homologs" -> historicalHomologs,
+      "serial_homologs" -> serialHomologs)
+      .add(entity.map(e => "entity" -> e.id))
+      .add(quality.map(q => "quality" -> q.id))
+    get[ResultList[Facet]](s"$api/gene/facet/phenotype/$facet?${toQuery(params)}").map(_.results)
+  }
+
   def queryTaxonAnnotations(entity: Option[IRI], quality: Option[IRI], inTaxon: Option[IRI], publication: Option[IRI], parts: Boolean, historicalHomologs: Boolean, serialHomologs: Boolean, limit: Int, offset: Int): Observable[List[TaxonAnnotation]] = {
     val params = Map[String, Any](
       "parts" -> parts,

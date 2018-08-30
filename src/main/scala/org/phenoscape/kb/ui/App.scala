@@ -42,7 +42,9 @@ object App extends JSApp {
       val tabToKey: Map[FacetPage.FacetTab, String] = Map(
         FacetPage.TaxaTab -> "taxa",
         FacetPage.PhenotypesTab -> "phenotypes",
-        FacetPage.AnnotationsTab -> "taxonannotations",
+        FacetPage.TaxonAnnotationsTab -> "taxonannotations",
+        FacetPage.GenesTab -> "genes",
+        FacetPage.GeneAnnotationsTab -> "geneannotations",
         FacetPage.PublicationsTab -> "publications")
       val keyToTab: Map[String, FacetPage.FacetTab] = tabToKey.map(_.swap)
 

@@ -47,7 +47,7 @@ object EntityPage extends Component {
       }.toSeq
     }
     val taxaLink = entityIRIObs.map(e => FacetURLP.urlForState(FacetPage.State(FacetPage.TaxaTab, List(e), Nil, Nil, None, false, false, false)))
-    val taxonAnnotationsLink = entityIRIObs.map(e => FacetURLP.urlForState(FacetPage.State(FacetPage.AnnotationsTab, List(e), Nil, Nil, None, false, false, false)))
+    val taxonAnnotationsLink = entityIRIObs.map(e => FacetURLP.urlForState(FacetPage.State(FacetPage.TaxonAnnotationsTab, List(e), Nil, Nil, None, false, false, false)))
     val phenotypesLink = entityIRIObs.map(e => FacetURLP.urlForState(FacetPage.State(FacetPage.PhenotypesTab, List(e), Nil, Nil, None, false, false, false)))
     val pubsLink = entityIRIObs.map(e => FacetURLP.urlForState(FacetPage.State(FacetPage.PublicationsTab, List(e), Nil, Nil, None, false, false, false)))
     def termLink(term: Term) = a(href := s"#/entity/${Vocab.compact(term.iri).id}", term.label)

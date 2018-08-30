@@ -58,7 +58,7 @@ object TaxonPage extends Component {
         dd((if (children.nonEmpty) children else List(i("None"))): _*))
     }
     val taxaLink = taxonIRIObs.map(t => FacetURLP.urlForState(FacetPage.State(FacetPage.TaxaTab, Nil, Nil, List(t), None, false, false, false)))
-    val taxonAnnotationsLink = taxonIRIObs.map(t => FacetURLP.urlForState(FacetPage.State(FacetPage.AnnotationsTab, Nil, Nil, List(t), None, false, false, false)))
+    val taxonAnnotationsLink = taxonIRIObs.map(t => FacetURLP.urlForState(FacetPage.State(FacetPage.TaxonAnnotationsTab, Nil, Nil, List(t), None, false, false, false)))
     val phenotypesLink = taxonIRIObs.map(t => FacetURLP.urlForState(FacetPage.State(FacetPage.PhenotypesTab, Nil, Nil, List(t), None, false, false, false)))
     val pubsLink = taxonIRIObs.map(t => FacetURLP.urlForState(FacetPage.State(FacetPage.PublicationsTab, Nil, Nil, List(t), None, false, false, false)))
 
