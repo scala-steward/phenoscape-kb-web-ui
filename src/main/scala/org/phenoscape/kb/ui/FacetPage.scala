@@ -17,44 +17,62 @@ import org.phenoscape.kb.ui.Model.AnnotationSource
 object FacetPage extends Component {
 
   sealed trait Action
+
   final case class SelectTab(tab: FacetTab) extends Action
+
   final case class SetEntityPath(entity: List[IRI]) extends Action
+
   final case class SetQualityPath(quality: List[IRI]) extends Action
+
   final case class SetTaxonPath(taxon: List[IRI]) extends Action
+
   final case class SetPublication(publication: Option[IRI]) extends Action
+
   final case class AddEntityToPath(entity: IRI) extends Action
+
   final case class AddQualityToPath(quality: IRI) extends Action
+
   final case class AddTaxonToPath(quality: IRI) extends Action
+
   final case class SetPage(tab: FacetTab, page: Int) extends Action
+
   final case class SetIncludeParts(include: Boolean) extends Action
+
   final case class SetIncludeHistoricalHomologs(include: Boolean) extends Action
+
   final case class SetIncludeSerialHomologs(include: Boolean) extends Action
 
   sealed trait FacetTab
+
   final case object PhenotypesTab extends FacetTab
+
   final case object TaxaTab extends FacetTab
+
   final case object TaxonAnnotationsTab extends FacetTab
+
   final case object GenesTab extends FacetTab
+
   final case object GeneAnnotationsTab extends FacetTab
+
   final case object PublicationsTab extends FacetTab
 
   final case class QuerySpec(entity: Option[IRI], quality: Option[IRI], taxon: Option[IRI], publication: Option[IRI], includeParts: Boolean, includeHistoricalHomologs: Boolean, includeSerialHomologs: Boolean)
 
   final case class State(
-    selectedTab:               FacetTab,
-    selectedEntityPath:        List[IRI],
-    selectedQualityPath:       List[IRI],
-    selectedTaxonPath:         List[IRI],
-    selectedPublication:       Option[IRI],
-    includeParts:              Boolean,
-    includeHistoricalHomologs: Boolean,
-    includeSerialHomologs:     Boolean,
-    taxaPage:                  Int         = 1,
-    phenotypesPage:            Int         = 1,
-    taxonAnnotationsPage:      Int         = 1,
-    genesPage:                 Int         = 1,
-    geneAnnotationsPage:       Int         = 1,
-    publicationsPage:          Int         = 1) extends ComponentState {
+                          selectedTab: FacetTab,
+                          selectedEntityPath: List[IRI],
+                          selectedQualityPath: List[IRI],
+                          selectedTaxonPath: List[IRI],
+                          selectedPublication: Option[IRI],
+                          includeParts: Boolean,
+                          includeHistoricalHomologs: Boolean,
+                          includeSerialHomologs: Boolean,
+                          taxaPage: Int = 1,
+                          phenotypesPage: Int = 1,
+                          taxonAnnotationsPage: Int = 1,
+                          genesPage: Int = 1,
+                          geneAnnotationsPage: Int = 1,
+                          publicationsPage: Int = 1) extends ComponentState {
 
     def evolve: Action => State = {
       case SelectTab(tab)                        => copy(selectedTab = tab)
@@ -68,7 +86,7 @@ object FacetPage extends Component {
       case SetIncludeParts(include)              => copy(includeParts = include, taxaPage = 1, phenotypesPage = 1, taxonAnnotationsPage = 1, genesPage = 1, geneAnnotationsPage = 1, publicationsPage = 1)
       case SetIncludeHistoricalHomologs(include) => copy(includeHistoricalHomologs = include, taxaPage = 1, phenotypesPage = 1, taxonAnnotationsPage = 1, genesPage = 1, geneAnnotationsPage = 1, publicationsPage = 1)
       case SetIncludeSerialHomologs(include)     => copy(includeSerialHomologs = include, taxaPage = 1, phenotypesPage = 1, taxonAnnotationsPage = 1, genesPage = 1, geneAnnotationsPage = 1, publicationsPage = 1)
-      case SetPage(tab, page) => tab match {
+      case SetPage(tab, page)                    => tab match {
         case PhenotypesTab       => copy(phenotypesPage = page)
         case TaxaTab             => copy(taxaPage = page)
         case TaxonAnnotationsTab => copy(taxonAnnotationsPage = page)
@@ -116,7 +134,9 @@ object FacetPage extends Component {
       case GenesTab            => "Genes"
       case PublicationsTab     => "Publications"
     }
+
     def totalToPages(num: Int): Int = (num / tablePageSize.toDouble).ceil.toInt
+
     val phenotypesTotalObs = querySpecObs.flatMap {
       case QuerySpec(e, q, t, p, parts, hist, serial) =>
         KBAPI.countTaxonPhenotypes(e, q, t, p, parts, hist, serial).map(Option(_)).startWith(None)
@@ -285,16 +305,18 @@ object FacetPage extends Component {
 
   private def dataTable(tab: FacetTab, querySpec: QuerySpec, currentPages: Map[FacetTab, Int], tableSize: Int): VNode = {
     val QuerySpec(entity, quality, taxon, publication, parts, hist, serial) = querySpec
+
     def offset(page: Int) = tableSize * (page - 1).max(0)
+
     val (header, rows) = tab match {
-      case PhenotypesTab =>
+      case PhenotypesTab       =>
         val data = KBAPI.queryTaxonPhenotypes(entity, quality, taxon, publication, parts, hist, serial, tableSize, offset(currentPages(PhenotypesTab))).startWith(Nil)
         (
           thead(tr(th("Phenotype"))),
           tbody(
             cls := "striped",
             children <-- data.map(_.map(singleTermRow))))
-      case TaxaTab =>
+      case TaxaTab             =>
         val data = KBAPI.queryTaxaWithPhenotype(entity, quality, taxon, publication, parts, hist, serial, tableSize, offset(currentPages(TaxaTab))).startWith(Nil)
         (
           thead(tr(
@@ -314,7 +336,7 @@ object FacetPage extends Component {
           tbody(
             cls := "sibling-striped",
             children <-- data.map(_.flatMap(taxonAnnotationRow))))
-      case PublicationsTab =>
+      case PublicationsTab     =>
         val data = KBAPI.queryStudiesWithPhenotype(entity, quality, taxon, publication, parts, hist, serial, tableSize, offset(currentPages(PublicationsTab))).startWith(Nil)
         (
           thead(tr(
@@ -322,7 +344,7 @@ object FacetPage extends Component {
           tbody(
             cls := "striped",
             children <-- data.map(_.map(publicationRow))))
-      case GenesTab =>
+      case GenesTab            =>
         val data = KBAPI.queryGenesWithPhenotype(entity, quality, parts, hist, serial, tableSize, offset(currentPages(GenesTab))).startWith(Nil)
         (
           thead(tr(
@@ -331,7 +353,7 @@ object FacetPage extends Component {
           tbody(
             cls := "striped",
             children <-- data.map(_.map(geneRow))))
-      case GeneAnnotationsTab => ???
+      case GeneAnnotationsTab  => ???
     }
     table(
       cls := "table table-condensed", header, rows)
@@ -424,7 +446,7 @@ object FacetPage extends Component {
         facets.sortBy(-_.count).map(facetChildLink(_, iris, newFocus))
     }
     val childrenLoaded = facetDataAndStatus.map(_._2)
-    val anyCount = countFunc.flatMap(_(None).map(_.toString).startWith(""))
+    val anyCount = countFunc.flatMap(_ (None).map(_.toString).startWith(""))
     val anySelected = focusItemPath.map(_.isEmpty)
     val anyCSSClass = anySelected.map(flag => if (flag) "selected-facet" else "")
 
@@ -447,7 +469,7 @@ object FacetPage extends Component {
   private def facetPathLink(termPath: List[IRI], countFunc: Observable[CountFn], newFocus: Sink[List[IRI]], selected: Boolean): VNode = {
     val currentTerm = termPath.head
     val termLabelObs = KBAPI.termLabel(currentTerm).map(_.label)
-    val countValue = countFunc.flatMap(_(Some(currentTerm)))
+    val countValue = countFunc.flatMap(_ (Some(currentTerm)))
     val countLoaded = countValue.map(_ => true).startWith(false)
     val count = countValue.map(_.toString).startWith("")
     val indent = span(termPath.map(_ => span(cls := "facet-indent")): _*)
