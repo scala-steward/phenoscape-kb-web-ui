@@ -56,7 +56,7 @@ object FacetPage extends Component {
     geneAnnotationsPage:       Int         = 1,
     publicationsPage:          Int         = 1) extends ComponentState {
 
-    def evolve = {
+    def evolve: Action => State = {
       case SelectTab(tab)                        => copy(selectedTab = tab)
       case SetEntityPath(entityList)             => copy(selectedEntityPath = entityList, taxaPage = 1, phenotypesPage = 1, taxonAnnotationsPage = 1, genesPage = 1, geneAnnotationsPage = 1, publicationsPage = 1)
       case SetQualityPath(qualityList)           => copy(selectedQualityPath = qualityList, taxaPage = 1, phenotypesPage = 1, taxonAnnotationsPage = 1, genesPage = 1, geneAnnotationsPage = 1, publicationsPage = 1)
@@ -138,7 +138,7 @@ object FacetPage extends Component {
     }
     val publicationsTotalPagesObs = publicationsTotalObs.map(_.map(totalToPages))
     val genesTotalObs = querySpecObs.flatMap {
-      case QuerySpec(e, q, t, p, parts, hist, serial) =>
+      case QuerySpec(e, q, _, p, parts, hist, serial) =>
         KBAPI.countGenesWithPhenotype(e, q, parts, hist, serial).map(Option(_)).startWith(None)
     }
     val genesTotalPagesObs = genesTotalObs.map(_.map(totalToPages))
@@ -197,7 +197,7 @@ object FacetPage extends Component {
           case TaxaTab             => KBAPI.countTaxaWithPhenotype(e, q, _: Option[IRI], p, parts, hist, serial)
           case TaxonAnnotationsTab => KBAPI.countTaxonAnnotations(e, q, _: Option[IRI], p, parts, hist, serial)
           case PublicationsTab     => KBAPI.countStudiesWithPhenotype(e, q, _: Option[IRI], p, parts, hist, serial)
-          case GenesTab            => (x: Option[IRI]) => Observable.of(0)
+          case GenesTab            => (_: Option[IRI]) => Observable.of(0)
         }
     }
     val taxonFacetFn = querySpecObs.map(spec => (spec.entity, spec.quality, spec.publication, spec.includeParts, spec.includeHistoricalHomologs, spec.includeSerialHomologs)).distinctUntilChanged.combineLatestWith(activeTab) {
@@ -207,13 +207,13 @@ object FacetPage extends Component {
           case TaxaTab             => KBAPI.facetTaxaWithPhenotype("taxon", e, q, _: Option[IRI], p, parts, hist, serial)
           case TaxonAnnotationsTab => KBAPI.facetTaxonAnnotations("taxon", e, q, _: Option[IRI], p, parts, hist, serial)
           case PublicationsTab     => KBAPI.facetStudiesWithPhenotype("taxon", e, q, _: Option[IRI], p, parts, hist, serial)
-          case GenesTab            => (x: Option[IRI]) => Observable.of(Nil)
+          case GenesTab            => (_: Option[IRI]) => Observable.of(Nil)
         }
     }
-    val setEntityPath = store.sink.redirectMap(SetEntityPath(_))
-    val setQualityPath = store.sink.redirectMap(SetQualityPath(_))
-    val setTaxonPath = store.sink.redirectMap(SetTaxonPath(_))
-    val setPublicationOpt = store.sink.redirectMap(SetPublication(_))
+    val setEntityPath: Sink[List[IRI]] = store.sink.redirectMap(SetEntityPath)
+    val setQualityPath: Sink[List[IRI]] = store.sink.redirectMap(SetQualityPath)
+    val setTaxonPath: Sink[List[IRI]] = store.sink.redirectMap(SetTaxonPath)
+    val setPublicationOpt: Sink[Option[IRI]] = store.sink.redirectMap(SetPublication)
     val entitySearch = Views.autocompleteField(KBAPI.ontologyClassSearch(_: String, Some(IRI(Vocab.Uberon)), 20), entityTerm, (term: Term) => term.label, setEntityPath.redirectMap((ot: Option[Term]) => ot.map(_.iri).toList), Some("any anatomical entity"))
     val qualitySearch = Views.autocompleteField(KBAPI.ontologyClassSearch(_: String, Some(IRI(Vocab.PATO)), 20), qualityTerm, (term: Term) => term.label, setQualityPath.redirectMap((ot: Option[Term]) => ot.map(_.iri).toList), Some("any phenotypic quality"))
     val taxonSearch = Views.autocompleteField(KBAPI.ontologyClassSearch(_: String, Some(IRI(Vocab.VTO)), 20), taxonTerm, (term: Term) => term.label, setTaxonPath.redirectMap((ot: Option[Term]) => ot.map(_.iri).toList), Some("any taxonomic group"))
@@ -363,7 +363,7 @@ object FacetPage extends Component {
     } //FIXME repeated code with similarity page
     val siblingToggleClickHandler = createHandler[Unit]()
     val innerView = siblingToggleClickHandler.first.map(_ => KBAPI.annotationSources(annotation).map(_.map(annotationSourceView))).flatten
-    val shouldHideSiblingView = siblingToggleClickHandler.scan(0)((a, b) => a + 1).map(i => (i % 2) == 0).startWith(true)
+    val shouldHideSiblingView = siblingToggleClickHandler.scan(0)((a, _) => a + 1).map(i => (i % 2) == 0).startWith(true)
     Seq(
       tr(
         cls := "striped",
@@ -417,11 +417,11 @@ object FacetPage extends Component {
       }
     }.startWith(Nil)
     val facetDataAndStatus = focusItemPath.combineLatestWith(facetFunc) { (list, facetFn) =>
-      facetFn(list.headOption).map((_, list) -> true).startWith((Nil, list) -> false)
+      facetFn(list.headOption).map(x => (x, list) -> true).startWith((Nil, list) -> false)
     }.flatten
     val facetChildElements = facetDataAndStatus.map {
-      case ((facets, list), _) =>
-        facets.sortBy(-_.count).map(facetChildLink(_, list, newFocus))
+      case ((facets, iris), _) =>
+        facets.sortBy(-_.count).map(facetChildLink(_, iris, newFocus))
     }
     val childrenLoaded = facetDataAndStatus.map(_._2)
     val anyCount = countFunc.flatMap(_(None).map(_.toString).startWith(""))
