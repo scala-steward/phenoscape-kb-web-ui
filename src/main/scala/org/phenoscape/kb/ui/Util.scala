@@ -9,13 +9,13 @@ import rxscalajs.Observable
 object Util {
 
   /**
-   * A handler for toggling CSS classes in response to events
-   */
+    * A handler for toggling CSS classes in response to events
+    */
   def createCSSClassHandler(initialClasses: String*): Handler[(String, Boolean)] = Sink.createHandler[(String, Boolean)](initialClasses.map(cls => cls -> true): _*)
 
   /**
-   * Map CSS class toggles to a usable attribute value
-   */
+    * Map CSS class toggles to a usable attribute value
+    */
   def observableCSS(toggles: Observable[(String, Boolean)]): Observable[String] = toggles.scan(Set.empty[String]) { (classes, action) =>
     action match {
       case (cls, true)  => classes + cls
@@ -33,9 +33,9 @@ object Util {
     IRI(s"http://phylopic.org/assets/images/submissions/$uuid.64.png")
   }
 
-  def interpolate[T](elem: T, xs: List[T]): List[T] = xs match {
+  def interpolate[T](elem: T, list: List[T]): List[T] = list match {
     case Nil             => Nil
-    case last @ x :: Nil => last
+    case last @ _ :: Nil => last
     case x :: xs         => x :: elem :: interpolate(elem, xs)
   }
 

@@ -12,6 +12,7 @@ object Model {
   sealed trait ID
 
   final case class IRI(id: String) extends ID
+
   object IRI {
 
     implicit val decoder: Decoder[IRI] = Decoder.decodeString.map(IRI.apply)
@@ -33,10 +34,10 @@ object Model {
   object TermInfo {
 
     implicit val decoder: Decoder[TermInfo] = Decoder.forProduct5("@id", "label", "definition", "synonyms", "relationships") { (id: String, label: String, definition: Option[String], synonyms: List[Map[String, String]], relationships: List[Relation]) =>
-      TermInfo(Term(IRI(id), label), definition.filterNot(_.isEmpty), synonyms.map { case syn => IRI(syn("property")) -> syn("value") }, relationships)
+      TermInfo(Term(IRI(id), label), definition.filterNot(_.isEmpty), synonyms.map(syn => IRI(syn("property")) -> syn("value")), relationships)
     }
   }
-  
+
   final case class Relation(property: Term, value: Term)
 
   final case class Taxon(iri: IRI, label: String, commonName: Option[String], extinct: Boolean, rank: Option[Term])
@@ -90,8 +91,8 @@ object Model {
   final case class ResultList[T](results: List[T])
 
   /**
-   * Match between two profiles.
-   */
+    * Match between two profiles.
+    */
   final case class SimilarityMatch(matchProfile: Term, medianScore: Double, expectScore: Double)
 
   object SimilarityMatch {

@@ -16,7 +16,7 @@ import rxscalajs.Observable
 object Views {
 
   def taxonName(taxon: Taxon): VNode = {
-    val isGenusOrSpecies = taxon.rank.map(rank => GenusOrSpecies(rank.iri.id)).getOrElse(false)
+    val isGenusOrSpecies = taxon.rank.exists(rank => GenusOrSpecies(rank.iri.id))
     var classes = List("taxon-name")
     if (taxon.extinct) classes = "extinct" :: classes
     val genusSpecies = if (isGenusOrSpecies) "genus-species" else ""
@@ -109,7 +109,7 @@ object Views {
     // val selectedIndex = createHandler[Int](0)
 
     val currentMatches = (for {
-      text <- enteredText.filter(_.size > 2).debounceTime(300)
+      text <- enteredText.filter(_.length > 2).debounceTime(300)
       matches <- search(text)
     } yield matches).merge(selection.map(_ => Nil))
     val hideDropdown = currentMatches.map(_.isEmpty)

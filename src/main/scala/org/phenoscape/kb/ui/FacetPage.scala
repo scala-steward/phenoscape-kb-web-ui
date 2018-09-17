@@ -285,7 +285,7 @@ object FacetPage extends Component {
 
   private def dataTable(tab: FacetTab, querySpec: QuerySpec, currentPages: Map[FacetTab, Int], tableSize: Int): VNode = {
     val QuerySpec(entity, quality, taxon, publication, parts, hist, serial) = querySpec
-    def offset(page: Int) = tableSize * ((page - 1).max(0))
+    def offset(page: Int) = tableSize * (page - 1).max(0)
     val (header, rows) = tab match {
       case PhenotypesTab =>
         val data = KBAPI.queryTaxonPhenotypes(entity, quality, taxon, publication, parts, hist, serial, tableSize, offset(currentPages(PhenotypesTab))).startWith(Nil)
@@ -313,7 +313,7 @@ object FacetPage extends Component {
             th("Sources"))),
           tbody(
             cls := "sibling-striped",
-            children <-- data.map(_.map(taxonAnnotationRow).flatten)))
+            children <-- data.map(_.flatMap(taxonAnnotationRow))))
       case PublicationsTab =>
         val data = KBAPI.queryStudiesWithPhenotype(entity, quality, taxon, publication, parts, hist, serial, tableSize, offset(currentPages(PublicationsTab))).startWith(Nil)
         (

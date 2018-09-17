@@ -4,10 +4,10 @@ import scala.scalajs.js.URIUtils.encodeURIComponent
 
 object QueryParams {
 
-  def toQuery(params: Map[String, Any]): String = (params.map {
+  def toQuery(params: Map[String, Any]): String = params.map {
     case (key, value) =>
       s"$key=${encodeURIComponent(value.toString)}"
-  }).toSeq.sorted.mkString("&")
+  }.toSeq.sorted.mkString("&")
 
   def toQueryQ(params: Map[String, Any]): String = {
     val values = toQuery(params)

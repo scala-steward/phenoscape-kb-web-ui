@@ -83,7 +83,7 @@ object GeneTaxonSimilarityPage extends Component {
                       style := "white-space: nowrap;", "Expect Score\u00A0", span(cls := "glyphicon glyphicon-info-sign")),
                     th())),
                 tbody(children <-- similarityMatches.map(_.map(matchRow(_, selectedMatch, store))))),
-              Views.pagination(obsPage, store.redirectMap(SelectMatchesPage(_)), obsTotalPages))),
+              Views.pagination(obsPage, store.redirectMap(SelectMatchesPage), obsTotalPages))),
           div(
             cls := "col-sm-8",
             div(
@@ -159,7 +159,7 @@ object GeneTaxonSimilarityPage extends Component {
   private def matchRow(matched: SimilarityMatch, selectedMatch: Observable[Option[Model.SimilarityMatch]], store: Store[State, Action]): VNode = {
     val taxonName = KBAPI.taxon(matched.matchProfile.iri).map(Views.taxonName)
     val hover = createBoolHandler(false)
-    val selected = selectedMatch.map(_ == Some(matched))
+    val selected = selectedMatch.map(_.contains(matched))
     val hoverOrSelected = hover.combineLatestWith(selected)((hov, sel) => hov || sel)
     val classes = Util.observableCSS(hover.map("active" -> _).merge(selected.map("info" -> _)))
     val group = KBAPI.taxonCommonGroup(matched.matchProfile.iri).map { grp =>
