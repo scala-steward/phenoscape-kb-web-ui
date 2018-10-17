@@ -1,20 +1,17 @@
 package org.phenoscape.kb.ui
 
-import scala.scalajs.js.URIUtils.encodeURIComponent
-
+import cats.data.Validated
+import cats.data.Validated.{Invalid, Valid}
+import io.circe._
+import io.circe.generic.auto._
+import io.circe.parser._
 import org.phenoscape.kb.ui.Model._
 import org.phenoscape.kb.ui.QueryParams._
-
-import io.circe._
-import io.circe.parser._
-import io.circe.generic.auto._
 import outwatch.http.Http
 import rxscalajs.Observable
-import rxscalajs.dom.Response
-import cats.data.Validated
-import cats.data.Validated.Valid
-import cats.data.Validated.Invalid
-import rxscalajs.dom.AjaxError
+import rxscalajs.dom.{AjaxError, Request, Response}
+
+import scala.scalajs.js.URIUtils.encodeURIComponent
 
 object KBAPI {
 
@@ -289,7 +286,8 @@ object KBAPI {
 
   private def enc(value: String): String = encodeURIComponent(value)
 
-  private def get[T](uri: String)(implicit evidence: Decoder[T]): Observable[T] = toCaseClass[T](Http.get(Observable.of(uri)))
+  private def get[T](uri: String)(implicit evidence: Decoder[T]): Observable[T] = toCaseClass[T](Http.getWithBody(Observable.of(
+    Request(uri, headers = Map("Accept" -> "application/json")))))
 
   private def toCaseClass[T](response: Observable[Response])(implicit evidence: Decoder[T]): Observable[T] = response.map(res => {
     val decoded = decode[T](res.body)
@@ -297,7 +295,7 @@ object KBAPI {
       case Left(error) =>
         println(error)
         println(s"Failed decoding JSON response: ${res.body.take(100)}...")
-      case _ => ()
+      case _           => ()
     }
     decoded
   }).collect { case Right(value) => value }
