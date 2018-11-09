@@ -418,8 +418,9 @@ object FacetPage extends Component {
   }
 
   private def geneRow(term: Term): VNode = {
+    val thumbnail = Util.modelOrganismThumbnailURL(term.iri)
     tr(
-      td(),
+      td(span(cls := "common-taxon-group", img(src := thumbnail))),
       td(term.label))
   }
 
