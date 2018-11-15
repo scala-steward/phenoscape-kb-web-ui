@@ -85,23 +85,31 @@ object EntityPage extends Component {
             p(a(href <-- phenotypesLink, "Related phenotypes")),
             p(a(href <-- pubsLink, "Related publications"))))))
   }
-  
+
   private def homologyAnnotationsView(annotations: List[HomologyAnnotation]): VNode = {
+    final case class UnsourcedHomologyAnnotation(subject: IRI, relation: IRI, `object`: IRI, subjectTaxon: IRI, objectTaxon: IRI, negated: Boolean)
     import outwatch.dom._
     if (annotations.isEmpty) p(i("None"))
     else {
-      def annotation(ann: HomologyAnnotation): VNode = {
-        val subjectLink = a(href := Util.linkToEntity(ann.subject), Views.termName(ann.subject))
-        val subjectTaxonLink = a(href := Util.linkToTaxon(ann.subjectTaxon), child <-- KBAPI.taxon(ann.subjectTaxon).map(Views.taxonName))
-        val objectLink = a(href := Util.linkToEntity(ann.`object`), Views.termName(ann.`object`))
-        val objectTaxonLink = a(href := Util.linkToTaxon(ann.objectTaxon), child <-- KBAPI.taxon(ann.objectTaxon).map(Views.taxonName))
-        val relationLabel = i(Views.termName(ann.relation))
-        val evidenceLink = a(target := "_blank", href := ann.evidence.id, Views.termName(ann.evidence))
-        li(subjectLink, " in ", subjectTaxonLink, " ", relationLabel, " ", objectLink, " in ", objectTaxonLink, " (", ann.source, ": ", evidenceLink, ")")
+      val grouped = annotations.groupBy {
+        case HomologyAnnotation(_, subj, rel, obj, subjectTaxon, objectTaxon, _, negated) => UnsourcedHomologyAnnotation(subj, rel, obj, subjectTaxon, objectTaxon, negated)
       }
-
-      val sorted = annotations.sortBy(_.relation.id)
-      ul(cls := "list-unstyled", children <-- Observable.of(sorted.map(annotation)))
+      val renderedAnnotations = grouped.map {
+        case (UnsourcedHomologyAnnotation(subj, rel, obj, subjectTaxon, objectTaxon, negated), anns) =>
+          val subjectLink = Popover.popup(Views.entityInfoView(subj), "auto", "focus")(Views.termName(subj))
+          val subjectTaxonLink = Popover.popup(Views.entityInfoView(subjectTaxon), "auto", "focus")(child <-- KBAPI.taxon(subjectTaxon).map(Views.taxonName))
+          val objectLink = Popover.popup(Views.entityInfoView(obj), "auto", "focus")(Views.termName(obj))
+          val objectTaxonLink = Popover.popup(Views.entityInfoView(objectTaxon), "auto", "focus")(child <-- KBAPI.taxon(objectTaxon).map(Views.taxonName))
+          val relationLabel = i(Views.termName(rel))
+          val negation = if (negated) b(" not ") else span(" ")
+          val sources = anns.map { ann =>
+            val evidenceLink = a(target := "_blank", href := ann.evidence.id, Views.termName(ann.evidence))
+            li(ann.source, ": ", evidenceLink)
+          }
+          val sourcesPopup = Popover.popup(ul(cls := "list-unstyled", children <-- Observable.of(sources)), "auto", "focus")(a(role := "button", span(cls := "glyphicon glyphicon-list-alt")))
+          li(subjectLink, " in ", subjectTaxonLink, negation, relationLabel, " ", objectLink, " in ", objectTaxonLink, " ", sourcesPopup)
+      }
+      ul(cls := "list-unstyled", children <-- Observable.of(renderedAnnotations.toList))
     }
   }
 
