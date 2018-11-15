@@ -55,4 +55,8 @@ object Util {
 
   }
 
+  def linkToTaxon(iri: IRI): String = s"#/taxon/${Vocab.compact(iri).id}"
+
+  def linkToEntity(iri: IRI): String = s"#/entity/${Vocab.compact(iri).id}"
+
 }

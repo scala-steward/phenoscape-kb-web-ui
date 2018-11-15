@@ -15,6 +15,8 @@ import rxscalajs.Observable
 
 object Views {
 
+  def termName(iri: IRI): VNode = span(title := iri.id, child <-- KBAPI.termLabel(iri).map(_.label))
+
   def taxonName(taxon: Taxon): VNode = {
     val isGenusOrSpecies = taxon.rank.exists(rank => GenusOrSpecies(rank.iri.id))
     var classes = List("taxon-name")
@@ -62,7 +64,7 @@ object Views {
         dt("Definition"), dd(child <-- term.map(_.definition.getOrElse(i("None")))),
         dt("ID"), dd(Vocab.compact(iri).id)),
       p(a(
-        href := s"#/entity/${Vocab.compact(iri).id}",
+        href := Util.linkToEntity(iri),
         s"View details for ", span(child <-- term.map(_.term.label)))))
   }
 
@@ -74,7 +76,7 @@ object Views {
         //dt("Synonyms"), dd(child <-- term.map(t => formatSynonyms(t.))), //FIXME add synonyms to taxon model
         dt("ID"), dd(Vocab.compact(iri).id)),
       p(a(
-        href := s"#/taxon/${Vocab.compact(iri).id}",
+        href := Util.linkToTaxon(iri),
         s"View details for ", span(child <-- term.map(taxonName)))))
   }
 

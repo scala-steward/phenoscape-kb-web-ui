@@ -269,6 +269,8 @@ object KBAPI {
 
   def kbInfo: Observable[KBInfo] = get[KBInfo](s"$api/kb/annotation_summary")
 
+  def homologyAnnotations(entity: IRI): Observable[List[HomologyAnnotation]] = get[ResultList[HomologyAnnotation]](s"$api/entity/homology?entity=${enc(entity.id)}").map(_.results)
+
   def resolveLabelExpression(expression: String): Observable[Validated[String, String]] =
     Http.get(Observable.of(s"$api/term/resolve_label_expression?expression=${enc(expression)}")).catchError { e =>
       // working around bug in error handling by Outwatch Http
