@@ -129,4 +129,6 @@ object Model {
 
   }
 
+  final case class HomologyAnnotation(source: String, subject: IRI, relation: IRI, `object`: IRI, subjectTaxon: IRI, objectTaxon: IRI, evidence: IRI, negated: Boolean)
+
 }
