@@ -17,7 +17,7 @@ object EntityPage extends Component {
 
   case class State(entityIRI: IRI) extends ComponentState {
 
-    def evolve = {
+    def evolve: Action => State = {
       case Init(iri) => copy(entityIRI = iri)
     }
 

@@ -25,6 +25,7 @@ object App extends JSApp {
     object AboutKBPage extends Page
     case class TaxonURL(id: String) extends Page
     case class EntityURL(id: String) extends Page
+    case class GeneURL(id: String) extends Page
     case class GeneSimilarityURL(id: String) extends Page
     object FacetURL extends Page
     case class FacetURLP(params: String) extends Page with ParameterizedURL {
@@ -72,6 +73,7 @@ object App extends JSApp {
         "/about/phenoscape/kb".const(AboutKBPage) ~> AboutKB(),
         ("/taxon" / string(".+")).caseClass[TaxonURL] ~> { case TaxonURL(id) => TaxonPage(TaxonPage.State(Vocab.expand(Curie(id)))) },
         ("/entity" / string(".+")).caseClass[EntityURL] ~> { case EntityURL(id) => EntityPage(EntityPage.State(Vocab.expand(Curie(id)))) },
+        ("/gene" / string(".+")).caseClass[GeneURL] ~> { case GeneURL(id) => GenePage(GenePage.State(Vocab.expand(Curie(id)))) },
         ("/similarity/gene" / string(".+")).caseClass[GeneSimilarityURL] ~> { case GeneSimilarityURL(id) => GeneTaxonSimilarityPage(GeneTaxonSimilarityPage.State(Vocab.expand(Curie(id)), None)) },
         ("/facet?" ~ remainingPathOrBlank).caseClass[FacetURLP] ~> (params => FacetPage(FacetPage.State(params.tab, params.entity.toList, params.quality.toList, params.taxon.toList, params.pub, false, false, false))),
         "/facet".const(FacetURL) ~> FacetPage(FacetPage.State(FacetPage.TaxaTab, Nil, Nil, Nil, None, false, false, false)),

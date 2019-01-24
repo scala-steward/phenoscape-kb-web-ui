@@ -35,6 +35,10 @@ object KBAPI {
     get[ResultList[Term]](s"$api/term/search_classes?${toQuery(params)}").map(_.results)
   }
 
+  def geneSearch(text: String, limit: Int): Observable[List[Gene]] = {
+    get[ResultList[Gene]](s"$api/gene/search?text=${enc(text)}&limit=$limit").map(_.results)
+  }
+
   def studySearch(text: String): Observable[List[Term]] = {
     val params = Map[String, Any](
       "text" -> text,

@@ -1,28 +1,22 @@
 package org.phenoscape.kb.ui
 
-import org.phenoscape.kb.ui.Model.IRI
-import org.phenoscape.kb.ui.Model.SimilarityMatch
-import org.phenoscape.kb.ui.Model.Term
-import org.phenoscape.kb.ui.Vocab._
-
-import outwatch.dom._
+import org.phenoscape.kb.ui.Model.{IRI, SimilarityMatch}
 import outwatch.dom.Attributes.style
-import outwatch.dom.Attributes.title
-import outwatch.dom.VNode
-import outwatch.redux.Component
-import outwatch.redux.Store
+import outwatch.dom.{VNode, _}
+import outwatch.redux.{Component, Store}
 import rxscalajs.Observable
-import outwatch.Sink
 
 object GeneTaxonSimilarityPage extends Component {
 
   sealed trait Action
+
   final case class SelectMatch(matched: SimilarityMatch) extends Action
+
   final case class SelectMatchesPage(page: Int) extends Action
 
   case class State(geneIRI: IRI, selectedMatch: Option[SimilarityMatch], selectedPage: Int = 1) extends ComponentState {
 
-    def evolve = {
+    def evolve: Action => State = {
       case SelectMatch(matched)    => copy(selectedMatch = Some(matched))
       case SelectMatchesPage(page) => copy(selectedPage = page, selectedMatch = None)
     }
@@ -54,11 +48,11 @@ object GeneTaxonSimilarityPage extends Component {
         KBAPI.bestMatches(geneIRI, IRI(Vocab.GeneSimilarityCorpus), matched.matchProfile.iri, IRI(Vocab.TaxonSimilarityCorpus)))).startWith(None)
     } yield annotationsOpt.map(_.results).toList.flatten
 
-  //  val handler = createHandler[Option[Term]]()
+    //  val handler = createHandler[Option[Term]]()
 
     div(
-      h2("Similar evolutionary variation"),
-     // Views.autocompleteField(KBAPI.ontologyClassSearch(_: String, Some(IRI(Vocab.VTO)), 20), handler, (term: Term) => term.label, handler, Some("type here")),
+      h3("Similar evolutionary variation"),
+      // Views.autocompleteField(KBAPI.ontologyClassSearch(_: String, Some(IRI(Vocab.VTO)), 20), handler, (term: Term) => term.label, handler, Some("type here")),
       p("These taxonomic groups vary in phenotypes that match most closely to the gene profile (collection of phenotypes) that result when the action of this gene is disrupted (e.g., knocked down)."),
       div(
         cls := "panel-body",
