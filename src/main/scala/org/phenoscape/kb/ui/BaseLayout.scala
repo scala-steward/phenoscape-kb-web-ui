@@ -1,9 +1,9 @@
 package org.phenoscape.kb.ui
 
+import org.phenoscape.kb.ui.Model.IRI
+import org.phenoscape.kb.ui.Util.StringOps
 import outwatch.dom._
 import rxscalajs.Observable
-import Util.StringOps
-import Model.IRI
 
 object BaseLayout {
 
@@ -16,11 +16,12 @@ object BaseLayout {
     val searches = searchTextOpt.map {
       case Some(text) => (
         KBAPI.ontologyClassSearch(text, Some(IRI(Vocab.Uberon)), 20),
-        KBAPI.ontologyClassSearch(text, Some(IRI(Vocab.VTO)), 20))
-      case None => (Observable.empty, Observable.empty)
+        KBAPI.ontologyClassSearch(text, Some(IRI(Vocab.VTO)), 20),
+        KBAPI.geneSearch(text, 20))
+      case None       => (Observable.empty, Observable.empty, Observable.empty)
     }
     val anatomyLinks = for {
-      (termsObs, _) <- searches
+      (termsObs, _, _) <- searches
       terms <- termsObs.startWith(Nil)
     } yield terms.map { term =>
       li(a(
@@ -28,13 +29,22 @@ object BaseLayout {
         href := s"#/entity/${Vocab.compact(term.iri).id}", term.label))
     }
     val taxonLinks = for {
-      (_, termsObs) <- searches
+      (_, termsObs, _) <- searches
       terms <- termsObs.startWith(Nil)
     } yield terms.map { term =>
       li(a(
         click("") --> editingTextHandler,
         href := s"#/taxon/${Vocab.compact(term.iri).id}", term.label))
     }
+    val geneLinks = for {
+      (_, _, genesObs) <- searches
+      genes <- genesObs.startWith(Nil)
+    } yield genes.map { gene =>
+      li(a(
+        click("") --> editingTextHandler,
+        href := s"#/gene/${Vocab.compact(gene.iri).id}", gene.label, " ", small("(", gene.taxon.label, ")")))
+    }
+
     def searchPicker(title: String, links: Observable[List[VNode]]): VNode = {
       val cssClasses = Util.observableCSS(links.map("text-muted" -> _.isEmpty))
       div(
@@ -105,7 +115,8 @@ object BaseLayout {
                 div(
                   cls := "panel-group",
                   searchPicker("Anatomical structures", anatomyLinks),
-                  searchPicker("Taxa", taxonLinks))))))),
+                  searchPicker("Taxa", taxonLinks),
+                  searchPicker("Genes", geneLinks))))))),
 
       div(child <-- node),
 
