@@ -14,7 +14,9 @@ import outwatch.redux.Store
 object TaxonPage extends Component {
 
   sealed trait Action
+
   case class Init(taxonIRI: IRI) extends Action
+
   case object ChangeTaxon extends Action
 
   case class State(taxonIRI: IRI) extends ComponentState {
@@ -37,9 +39,11 @@ object TaxonPage extends Component {
     val obsTaxon = taxonIRIObs.flatMap(t => KBAPI.taxon(t))
     val obsTermInfo = taxonIRIObs.flatMap(t => KBAPI.termInfo(t))
     val obsClassificationData = taxonIRIObs.flatMap(t => KBAPI.classification(t, IRI(VTO)))
+
     def taxonTermToView(term: Term) = a(
       href := s"#/taxon/${Vocab.compact(term.iri).id}",
       child <-- KBAPI.taxon(term.iri).map(Views.taxonName))
+
     val relationshipsDL = for {
       classification <- obsClassificationData
     } yield {
@@ -61,6 +65,7 @@ object TaxonPage extends Component {
     val taxonAnnotationsLink = taxonIRIObs.map(t => FacetURLP.urlForState(FacetPage.State(FacetPage.TaxonAnnotationsTab, Nil, Nil, List(t), None, false, false, false)))
     val phenotypesLink = taxonIRIObs.map(t => FacetURLP.urlForState(FacetPage.State(FacetPage.PhenotypesTab, Nil, Nil, List(t), None, false, false, false)))
     val pubsLink = taxonIRIObs.map(t => FacetURLP.urlForState(FacetPage.State(FacetPage.PublicationsTab, Nil, Nil, List(t), None, false, false, false)))
+    val obsSimilarityComponent = taxonIRIObs.map(iri => TaxonGeneSimilarityComponent(TaxonGeneSimilarityComponent.State(iri, None)))
 
     div(
       h2(
@@ -92,7 +97,12 @@ object TaxonPage extends Component {
             p(a(href <-- taxaLink, "Taxa in this group with phenotypes")),
             p(a(href <-- taxonAnnotationsLink, "Taxon phenotype annotations")),
             p(a(href <-- phenotypesLink, "Phenotypes annotated to taxa within this group")),
-            p(a(href <-- pubsLink, "Related publications"))))))
+            p(a(href <-- pubsLink, "Related publications"))
+          ))),
+      div(cls := "row",
+        div(cls := "col-sm-12",
+          div(child <-- obsSimilarityComponent)
+        )))
   }
 
 }
