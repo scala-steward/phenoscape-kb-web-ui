@@ -24,6 +24,8 @@ object Vocab {
     "UBERON" -> "http://purl.obolibrary.org/obo/UBERON_",
     "PATO" -> "http://purl.obolibrary.org/obo/PATO_",
     "ZFIN" -> "http://zfin.org/",
+    "MGI" -> "http://www.informatics.jax.org/marker/MGI:",
+    "ncbigene" -> "http://www.ncbi.nlm.nih.gov/gene/",
     "DOI" -> "http://dx.doi.org/",
     "HDL" -> "http://hdl.handle.net/",
     "JSTOR" -> "http://www.jstor.org/stable/")

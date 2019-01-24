@@ -59,4 +59,6 @@ object Util {
 
   def linkToEntity(iri: IRI): String = s"#/entity/${Vocab.compact(iri).id}"
 
+  def linkToGene(iri: IRI): String = s"#/gene/${Vocab.compact(iri).id}"
+
 }

@@ -421,7 +421,7 @@ object FacetPage extends Component {
     val thumbnail = Util.modelOrganismThumbnailURL(term.iri)
     tr(
       td(span(cls := "common-taxon-group", img(src := thumbnail))),
-      td(term.label))
+      td(a(href := Util.linkToGene(term.iri), term.label)))
   }
 
   private def publicationRow(term: Term): VNode = {
