@@ -53,12 +53,12 @@ object Home extends Component {
               panel("Software and Data")(
                 h5(a(href := "http://rphenoscape.phenoscape.org", "RPhenoscape")),
                 p("This package facilitates interfacing with the Phenoscape Knowledgebase for searching ontology terms, retrieving term info, and querying data matrices."),
-                h5(a(href := "https://github.com/phenoscape", "Phenoscape code on GitHub")),
-                p("Software developed by the Phenoscape project is freely available and open source."),
                 h5(a(href := "https://kb.phenoscape.org/apidocs/#/", "Web service API")),
                 p("This website is built on our publicly accessible web service APIs. Service documentation and automatically generated code examples are available at the link above."),
                 h5(a(href := "https://github.com/phenoscape/Phenex/wiki", "Phenex annotation software")),
-                p("Phenex is an application for annotating character matrix files with ontology terms using the Entity–Quality syntax for describing phenotypes.")
+                p("Phenex is an application for annotating character matrix files with ontology terms using the Entity–Quality syntax for describing phenotypes."),
+                h5(a(href := "https://github.com/phenoscape", "Phenoscape code on GitHub")),
+                p("Software developed by the Phenoscape project is freely available and open source.")
               )
             )
           )
