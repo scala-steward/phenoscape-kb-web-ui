@@ -127,7 +127,7 @@ object BaseLayout {
           div(
             cls := "panel panel-default kb-stats-panel top-buffer",
             div(cls := "panel-heading",
-              h4(style := "margin-top: 0px; margin-bottom: 0px", child <-- dateStringObs.map(date => s"Current release: $date"))
+              h5(style := "margin-top: 0px; margin-bottom: 0px", child <-- dateStringObs.map(date => s"Current release: $date"))
             ),
             table(
               cls := "table table-condensed",
