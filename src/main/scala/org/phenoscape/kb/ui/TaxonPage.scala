@@ -98,11 +98,7 @@ object TaxonPage extends Component {
             p(a(href <-- taxonAnnotationsLink, "Taxon phenotype annotations")),
             p(a(href <-- phenotypesLink, "Phenotypes annotated to taxa within this group")),
             p(a(href <-- pubsLink, "Related publications"))
-          ))),
-      div(cls := "row",
-        div(cls := "col-sm-12",
-          div(child <-- obsSimilarityComponent)
-        )))
+          ))))
   }
 
 }
