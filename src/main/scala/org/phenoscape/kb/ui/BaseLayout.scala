@@ -58,7 +58,7 @@ object BaseLayout {
               id := "mainSearch",
               tpe := "search",
               cls := "form-control input-sm",
-              placeholder := "Taxon or anatomical structure",
+              placeholder := "Taxon, anatomical structure, or gene",
               change --> searchTextHandler.redirectMap(_.target.value.stripToOption),
               inputString --> editingTextHandler,
               value <-- editingTextHandler),
