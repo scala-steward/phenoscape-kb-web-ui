@@ -122,7 +122,7 @@ object GeneTaxonSimilarityPage extends Component {
                         cls := "form-control-static",
                         span(child <-- obsGeneLabel), " (", span(child <-- obsGeneTaxonLabel), ") ",
                         small(a(
-                          href := "#", //FIXME link to phenotype profile
+                          //href := "#", //FIXME link to phenotype profile
                           span(child <-- queryProfileSizeOpt.map(_.getOrElse(""))),
                           " phenotypes"))))),
                   div(
@@ -134,7 +134,7 @@ object GeneTaxonSimilarityPage extends Component {
                         cls := "form-control-static",
                         span(child <-- selectedMatchAsTaxon.map(_.map(Views.taxonName).getOrElse(span()))), " ",
                         small(a(
-                          href := "#", //FIXME link to phenotype profile
+                          //href := "#", //FIXME link to phenotype profile
                           span(child <-- selectedMatchProfileSizeOpt.map(_.map(_.toString).getOrElse(""))),
                           " phenotypes"))))),
                   div(
