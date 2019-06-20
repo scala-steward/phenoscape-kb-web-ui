@@ -108,6 +108,8 @@ object Home extends Component {
             h3("Analysis tools"),
             ul(
               li(a(href := "#/ontotrace", "OntoTrace (anatomical presence/absence inference)")),
+              li(a(href := "#/similarity/taxon", "Semantic similarity (search for gene profiles similar to variation within a specific taxon")),
+              li(a(href := "#/similarity/gene", "Semantic similarity (search for taxonomic variation similar to a specific gene profile")),
               li(a(href := "#/annotate_text", "Annotate text"))),
             h3("Data API"),
             p(

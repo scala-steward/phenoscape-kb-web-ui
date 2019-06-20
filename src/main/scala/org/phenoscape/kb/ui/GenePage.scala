@@ -29,7 +29,7 @@ object GenePage extends Component {
 
     val obsGeneIRI = store.map(_.geneIRI).distinctUntilChanged
     val obsGene = obsGeneIRI.flatMap(t => KBAPI.gene(t))
-    val obsSimilarityComponent = obsGeneIRI.map(iri => GeneTaxonSimilarityPage(GeneTaxonSimilarityPage.State(iri, None)))
+    val obsSimilarityComponent = obsGeneIRI.map(iri => GeneTaxonSimilarityPage(GeneTaxonSimilarityPage.State(Some(iri), None)))
 
     div(
       h2(

@@ -21,9 +21,9 @@ object App extends JSApp {
 
     sealed trait Page
 
-    object HomePage extends Page
+    case object HomePage extends Page
 
-    object AboutKBPage extends Page
+    case object AboutKBPage extends Page
 
     case class TaxonURL(id: String) extends Page
 
@@ -31,9 +31,15 @@ object App extends JSApp {
 
     case class GeneURL(id: String) extends Page
 
-    case class GeneSimilarityURL(id: String) extends Page
+    case object GeneSimilarityURL extends Page
 
-    object FacetURL extends Page
+    case class GeneSimilarityURLP(id: String) extends Page
+
+    case object TaxonSimilarityURL extends Page
+
+    case class TaxonSimilarityURLP(id: String) extends Page
+
+    case object FacetURL extends Page
 
     //FIXME add state for inferred presence/absence
     case class FacetURLP(params: String) extends Page with ParameterizedURL {
@@ -87,7 +93,10 @@ object App extends JSApp {
         ("/taxon" / string(".+")).caseClass[TaxonURL] ~> { case TaxonURL(id) => TaxonPage(TaxonPage.State(Vocab.expand(Curie(id)))) },
         ("/entity" / string(".+")).caseClass[EntityURL] ~> { case EntityURL(id) => EntityPage(EntityPage.State(Vocab.expand(Curie(id)))) },
         ("/gene" / string(".+")).caseClass[GeneURL] ~> { case GeneURL(id) => GenePage(GenePage.State(Vocab.expand(Curie(id)))) },
-        ("/similarity/gene" / string(".+")).caseClass[GeneSimilarityURL] ~> { case GeneSimilarityURL(id) => GeneTaxonSimilarityPage(GeneTaxonSimilarityPage.State(Vocab.expand(Curie(id)), None)) },
+        ("/similarity/gene" / string(".+")).caseClass[GeneSimilarityURLP] ~> { case GeneSimilarityURLP(id) => GeneTaxonSimilarityPage(GeneTaxonSimilarityPage.State(Some(Vocab.expand(Curie(id))), None)) },
+        "/similarity/gene".const(GeneSimilarityURL) ~> GeneTaxonSimilarityPage(GeneTaxonSimilarityPage.State(None, None)),
+        ("/similarity/taxon" / string(".+")).caseClass[TaxonSimilarityURLP] ~> { case TaxonSimilarityURLP(id) => TaxonGeneSimilarityPage(TaxonGeneSimilarityPage.State(Some(Vocab.expand(Curie(id))), None)) },
+        "/similarity/taxon".const(TaxonSimilarityURL) ~> TaxonGeneSimilarityPage(TaxonGeneSimilarityPage.State(None, None)),
         ("/facet?" ~ remainingPathOrBlank).caseClass[FacetURLP] ~> (params => FacetPage(FacetPage.State(params.tab, params.entity.toList, params.quality.toList, params.taxon.toList, params.pub, PhenotypicQuality, false, false, false))),
         "/facet".const(FacetURL) ~> FacetPage(FacetPage.State(FacetPage.TaxaTab, Nil, Nil, Nil, None, PhenotypicQuality, false, false, false)),
         "/ontotrace".const(OntotraceURL) ~> OntoTracePage(OntoTracePage.State(OntoTracePage.SimpleMode, None, None, false, false, Invalid(None), Invalid(None))))
