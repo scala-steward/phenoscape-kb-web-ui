@@ -2,6 +2,7 @@ package org.phenoscape.kb.ui
 
 import org.phenoscape.kb.ui.Model.IRI
 import org.phenoscape.kb.ui.Util.StringOps
+import outwatch.dom.Attributes.style
 import outwatch.dom._
 import rxscalajs.Observable
 
@@ -125,7 +126,9 @@ object BaseLayout {
           cls := "col-xs-4",
           div(
             cls := "panel panel-default kb-stats-panel top-buffer",
-            div(cls := "panel-heading", h4(child <-- dateStringObs.map(date => s"Current release: $date"))),
+            div(cls := "panel-heading",
+              h4(style := "margin-top: 0px; margin-bottom: 0px", child <-- dateStringObs.map(date => s"Current release: $date"))
+            ),
             table(
               cls := "table table-condensed",
               tbody(
