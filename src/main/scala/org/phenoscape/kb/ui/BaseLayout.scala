@@ -46,7 +46,7 @@ object BaseLayout {
     }
 
     div(
-      cls := s"panel panel-$state top-buffer",
+      cls := s"panel panel-$state",
       div(
         cls := "panel-body",
         div(
