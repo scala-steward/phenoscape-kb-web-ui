@@ -7,7 +7,7 @@ import rxscalajs.Observable
 
 object BaseLayout {
 
-  def view(node: Observable[VNode]): VNode = {
+  def mainSearch(state: String = "default"): VNode = {
     val searchTextHandler = createHandler[Option[String]](None)
     val editingTextHandler = createStringHandler()
     val textChanges = editingTextHandler.mapTo(None)
@@ -45,21 +45,59 @@ object BaseLayout {
         href := s"#/gene/${Vocab.compact(gene.iri).id}", gene.label, " ", small("(", gene.taxon.label, ")")))
     }
 
-    def searchPicker(title: String, links: Observable[List[VNode]]): VNode = {
-      val cssClasses = Util.observableCSS(links.map("text-muted" -> _.isEmpty))
+    div(
+      cls := s"panel panel-$state top-buffer",
       div(
-        cls := "search-picker-group panel panel-default",
+        cls := "panel-body",
         div(
-          cls := "panel-heading",
-          h4(
-            cls := "panel-title",
-            span(cls <-- cssClasses, title))),
+          cls := "form-group",
+          label(`for` := "mainSearch", "Find an item by name"),
+          div(
+            cls := "input-group",
+            input(
+              id := "mainSearch",
+              tpe := "search",
+              cls := "form-control input-sm",
+              placeholder := "Taxon or anatomical structure",
+              change --> searchTextHandler.redirectMap(_.target.value.stripToOption),
+              inputString --> editingTextHandler,
+              value <-- editingTextHandler),
+            span(
+              cls := "input-group-btn",
+              button(
+                click("") --> editingTextHandler,
+                cls := "btn btn-default btn-sm",
+                tpe := "button",
+                "×")))),
         div(
-          cls := "panel-body",
-          ul(
-            cls := "list-inline",
-            children <-- links)))
-    }
+          cls := "search-picker",
+          hidden <-- hidePanel,
+          div(
+            cls := "panel-group",
+            searchPicker("Anatomical structures", anatomyLinks),
+            searchPicker("Taxa", taxonLinks),
+            searchPicker("Genes", geneLinks)))))
+  }
+
+  private def searchPicker(title: String, links: Observable[List[VNode]]): VNode = {
+    val cssClasses = Util.observableCSS(links.map("text-muted" -> _.isEmpty))
+    div(
+      cls := "search-picker-group panel panel-default",
+      div(
+        cls := "panel-heading",
+        h4(
+          cls := "panel-title",
+          span(cls <-- cssClasses, title))),
+      div(
+        cls := "panel-body",
+        ul(
+          cls := "list-inline",
+          children <-- links)))
+  }
+
+  def view(node: Observable[VNode]): VNode = {
+    val kbData = KBAPI.kbInfo
+    val dateStringObs = kbData.map(_.buildDate.toLocaleDateString)
 
     div(
       cls := "container-fluid",
@@ -86,37 +124,24 @@ object BaseLayout {
         div(
           cls := "col-xs-4",
           div(
-            cls := "panel panel-default top-buffer",
-            div(
-              cls := "panel-body",
-              div(
-                cls := "form-group",
-                label(`for` := "mainSearch", "Find an item by name"),
-                div(
-                  cls := "input-group",
-                  input(
-                    id := "mainSearch",
-                    tpe := "search",
-                    cls := "form-control input-sm",
-                    placeholder := "Taxon or anatomical structure",
-                    change --> searchTextHandler.redirectMap(_.target.value.stripToOption),
-                    inputString --> editingTextHandler,
-                    value <-- editingTextHandler),
-                  span(
-                    cls := "input-group-btn",
-                    button(
-                      click("") --> editingTextHandler,
-                      cls := "btn btn-default btn-sm",
-                      tpe := "button",
-                      "×")))),
-              div(
-                cls := "search-picker",
-                hidden <-- hidePanel,
-                div(
-                  cls := "panel-group",
-                  searchPicker("Anatomical structures", anatomyLinks),
-                  searchPicker("Taxa", taxonLinks),
-                  searchPicker("Genes", geneLinks))))))),
+            cls := "panel panel-default kb-stats-panel top-buffer",
+            div(cls := "panel-heading", h4(child <-- dateStringObs.map(date => s"Current release: $date"))),
+            table(
+              cls := "table table-condensed",
+              tbody(
+                tr(
+                  cls := "text-right",
+                  td("Annotated matrices:"), td(child <-- kbData.map(_.annotatedMatrices))),
+                tr(
+                  cls := "text-right",
+                  td("Annotated taxa:"), td(child <-- kbData.map(_.annotatedTaxa))),
+                tr(
+                  cls := "text-right",
+                  td("Annotated characters:"), td(child <-- kbData.map(_.annotatedCharacters))),
+                tr(
+                  cls := "text-right",
+                  td("Annotated character states:"), td(child <-- kbData.map(_.annotatedStates))))))
+        )),
 
       div(child <-- node),
 

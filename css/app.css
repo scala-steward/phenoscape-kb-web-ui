@@ -16,6 +16,8 @@ a[disabled] {
     
 }
 
+.kb-stats-panel { font-size: 80%; }
+
 h2 .badge { vertical-align: middle; }
 
 .bottom-buffer { margin-bottom:20px; }
