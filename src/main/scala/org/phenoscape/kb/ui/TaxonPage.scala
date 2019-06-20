@@ -21,7 +21,7 @@ object TaxonPage extends Component {
 
   case class State(taxonIRI: IRI) extends ComponentState {
 
-    def evolve = {
+    def evolve: Action => State = {
       case Init(iri)   => copy(taxonIRI = iri)
       case ChangeTaxon => ???
     }
@@ -65,7 +65,7 @@ object TaxonPage extends Component {
     val taxonAnnotationsLink = taxonIRIObs.map(t => FacetURLP.urlForState(FacetPage.State(FacetPage.TaxonAnnotationsTab, Nil, Nil, List(t), None, PhenotypicQuality, false, false, false)))
     val phenotypesLink = taxonIRIObs.map(t => FacetURLP.urlForState(FacetPage.State(FacetPage.PhenotypesTab, Nil, Nil, List(t), None, PhenotypicQuality, false, false, false)))
     val pubsLink = taxonIRIObs.map(t => FacetURLP.urlForState(FacetPage.State(FacetPage.PublicationsTab, Nil, Nil, List(t), None, PhenotypicQuality, false, false, false)))
-    val obsSimilarityComponent = taxonIRIObs.map(iri => TaxonGeneSimilarityComponent(TaxonGeneSimilarityComponent.State(iri, None)))
+    val obsSimilarityComponent = taxonIRIObs.map(iri => TaxonGeneSimilarityPage(TaxonGeneSimilarityPage.State(Some(iri), None)))
 
     div(
       h2(

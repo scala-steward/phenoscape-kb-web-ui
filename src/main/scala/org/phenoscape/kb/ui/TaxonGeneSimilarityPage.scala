@@ -1,22 +1,25 @@
 package org.phenoscape.kb.ui
 
-import org.phenoscape.kb.ui.Model.{IRI, SimilarityMatch}
-import outwatch.dom.Attributes.style
+import org.phenoscape.kb.ui.Model.{IRI, SimilarityMatch, Taxon, Term}
+import outwatch.dom.Attributes.{style, title}
 import outwatch.dom.{VNode, _}
 import outwatch.redux.{Component, Store}
 import rxscalajs.Observable
 
-object TaxonGeneSimilarityComponent extends Component {
+object TaxonGeneSimilarityPage extends Component {
 
   sealed trait Action
+
+  final case class SetTaxonIRI(taxonIRIOpt: Option[IRI]) extends Action
 
   final case class SelectMatch(matched: SimilarityMatch) extends Action
 
   final case class SelectMatchesPage(page: Int) extends Action
 
-  case class State(taxonIRI: IRI, selectedMatch: Option[SimilarityMatch], selectedPage: Int = 1) extends ComponentState {
+  case class State(taxonIRI: Option[IRI], selectedMatch: Option[SimilarityMatch], selectedPage: Int = 1) extends ComponentState {
 
     def evolve: Action => State = {
+      case SetTaxonIRI(iriOpt)     => copy(taxonIRI = iriOpt, selectedMatch = None, selectedPage = 1)
       case SelectMatch(matched)    => copy(selectedMatch = Some(matched))
       case SelectMatchesPage(page) => copy(selectedPage = page, selectedMatch = None)
     }
@@ -27,36 +30,53 @@ object TaxonGeneSimilarityComponent extends Component {
 
   def view(store: Store[State, Action]): VNode = {
     val matchesPageSize = 20
-    val obsTaxonIRI = store.map(_.taxonIRI).distinctUntilChanged
+    val obsTaxonIRIOpt = store.map(_.taxonIRI).distinctUntilChanged
     val obsPage = store.map(_.selectedPage).distinctUntilChanged
-    val obsSubject = obsTaxonIRI.flatMap(KBAPI.taxon)
+    val obsSubject = obsTaxonIRIOpt.flatMap(iriOpt => Util.sequence(iriOpt.map(KBAPI.taxon)))
+    val obsSubjectAsTerm = obsSubject.map(_.map(t => Term(t.iri, t.label)))
     val corpusSize = KBAPI.similarityCorpusSize(IRI(Vocab.GeneSimilarityCorpus))
     val similarityMatches = for {
-      (iri, page) <- obsTaxonIRI.combineLatest(obsPage)
+      (iriOpt, page) <- obsTaxonIRIOpt.combineLatest(obsPage)
       offset = (page - 1) * matchesPageSize
-      simMatches <- KBAPI.similarityMatches(iri, IRI(Vocab.GeneSimilarityCorpus), matchesPageSize, offset).map(_.results).startWith(Nil)
+      simMatches <- iriOpt.map(iri => KBAPI.similarityMatches(iri, IRI(Vocab.GeneSimilarityCorpus), matchesPageSize, offset).map(_.results).startWith(Nil)).getOrElse(Observable.just(Nil))
     } yield simMatches
     val obsTotalPages = corpusSize.map(num => (num / matchesPageSize.toDouble).ceil.toInt)
     val selectedMatch = store.map(_.selectedMatch).distinctUntilChanged
     val hasMatchSelection = selectedMatch.map(_.nonEmpty)
-    val queryProfileSize = obsTaxonIRI.flatMap(KBAPI.similarityProfileSize)
+    val queryProfileSizeOpt = obsTaxonIRIOpt.flatMap(iriOpt => Util.sequence(iriOpt.map(KBAPI.similarityProfileSize)))
     val selectedMatchProfileSizeOpt = selectedMatch.flatMap(matchedOpt => Util.sequence(matchedOpt.map(matched => KBAPI.similarityProfileSize(matched.matchProfile.iri))))
     val selectedMatchAsGene = selectedMatch.flatMap(matchedOpt => Util.sequence(matchedOpt.map(matched => KBAPI.gene(matched.matchProfile.iri))))
     val selectedMatchAnnotations = for {
-      (taxonIRI, matchedOpt) <- obsTaxonIRI.combineLatest(selectedMatch)
-      annotationsOpt <- Util.sequence(matchedOpt.map(matched =>
-        KBAPI.bestMatches(taxonIRI, IRI(Vocab.TaxonSimilarityCorpus), matched.matchProfile.iri, IRI(Vocab.GeneSimilarityCorpus)))).startWith(None)
+      (taxonIRIOpt, matchedOpt) <- obsTaxonIRIOpt.combineLatest(selectedMatch)
+      annotationsOpt <- Util.sequence(for {
+        taxonIRI <- taxonIRIOpt
+        matched <- matchedOpt
+      } yield KBAPI.bestMatches(taxonIRI, IRI(Vocab.TaxonSimilarityCorpus), matched.matchProfile.iri, IRI(Vocab.GeneSimilarityCorpus))).startWith(None)
     } yield annotationsOpt.map(_.results).toList.flatten
+    val obsTaxonLabel = obsSubject.map(_.map(_.label).getOrElse(""))
+
+    val taxonSearch = Views.autocompleteField(KBAPI.ontologyClassSearch(_: String, Some(IRI(Vocab.VTO)), 20), obsSubjectAsTerm, (term: Term) => term.label, store.redirectMap((og: Option[Term]) => SetTaxonIRI(og.map(_.iri))), Some("any taxonomic group"), Observable.of(false))
 
     div(
       h3("Similar gene phenotypes"),
-      // Views.autocompleteField(KBAPI.ontologyClassSearch(_: String, Some(IRI(Vocab.VTO)), 20), handler, (term: Term) => term.label, handler, Some("type here")),
       p("These genes have phenotypic profiles (that result when the action of the gene is disrupted) that match most closely to the phenotypic variation within this taxonomic group."),
       div(
         cls := "panel-body",
         div(
           cls := "row",
-          h4("Gene phenotype profiles matching variation within taxon ", b(span(child <-- obsSubject.map(_.label)))),
+          div(
+            cls := "col-sm-4",
+            h4("Taxon:"),
+            taxonSearch
+          )
+        ),
+        div(
+          cls := "row",
+          div(
+            cls := "col-sm-12",
+            h4("Gene phenotype profiles matching variation within taxon ", b(span(child <-- obsTaxonLabel))))),
+        div(
+          cls := "row",
           div(
             cls := "col-sm-4",
             div(hidden <-- similarityMatches.map(_.nonEmpty), i("No matches")),
@@ -100,10 +120,10 @@ object TaxonGeneSimilarityComponent extends Component {
                       cls := "col-sm-9",
                       p(
                         cls := "form-control-static",
-                        span(child <-- obsSubject.map(_.label)), " ",
+                        span(child <-- obsTaxonLabel), " ",
                         small(a(
                           href := "#", //FIXME link to phenotype profile
-                          span(child <-- queryProfileSize),
+                          span(child <-- queryProfileSizeOpt.map(_.getOrElse(""))),
                           " phenotypes"))))),
                   div(
                     cls := "form-group",
@@ -145,7 +165,8 @@ object TaxonGeneSimilarityComponent extends Component {
                       data.toggle := "popover", data.trigger := "hover", data.placement := "auto", data.container := "body",
                       data.content := "The Match Information Content (IC) describes the specificity of the match between two compared phenotypes. The IC is normalized such that a match with value of 0.0 subsumes all items in the search corpus, while a match with value of 1.0 is annotated to only one item.",
                       span(cls := "glyphicon glyphicon-info-sign")))),
-                tbody(children <-- selectedMatchAnnotations.map(_.map(matchAnnotationsRow)))))))))
+                tbody(children <-- selectedMatchAnnotations.map(_.map(matchAnnotationsRow))))))))
+    )
   }
 
   private def matchRow(matched: SimilarityMatch, selectedMatch: Observable[Option[Model.SimilarityMatch]], store: Store[State, Action]): VNode = {
@@ -175,13 +196,23 @@ object TaxonGeneSimilarityComponent extends Component {
       td(
         cls := "text-center",
         a(
-          span(hidden := true, cls := "popover-element", a(s"Hello, IC is ${annotationMatch.bestSubsumer.ic.toString}"), br(), button("Click me"), br(), button("Click me as well")), //FIXME popover content
-          data.toggle := "popover", data.trigger := "focus", data.placement := "auto", data.container := "body", data.html := true, data.title := "Popup title",
+          span(hidden := true, cls := "popover-element",
+            label(`for` := "mica", "Most Informative Common Ancestor"),
+            p(name := "mica", cls := "form-control-static", span(title := annotationMatch.bestSubsumer.term.iri, annotationMatch.bestSubsumer.term.label)),
+            label(`for` := "mica", "Information Content"),
+            p(name := "mica", cls := "form-control-static", span(annotationMatch.bestSubsumer.ic.formatted("%.2f")))
+          ),
+          data.toggle := "popover", data.trigger := "focus", data.placement := "auto", data.container := "body", data.html := true, data.title := "Match Details",
           Popover.complexPopover,
           tabindex := 0,
           role := "button",
           annotationMatch.bestSubsumer.ic.formatted("%.2f")), "\u00A0",
-        span(hidden := annotationMatch.bestSubsumer.disparity <= 0.25, span(cls := "text-danger glyphicon glyphicon-flag")))) //FIXME popup
+        span(hidden := annotationMatch.bestSubsumer.disparity <= 0.25,
+          Popover.simplePopover,
+          style := "white-space: nowrap;",
+          data.toggle := "popover", data.trigger := "hover", data.placement := "auto", data.container := "body",
+          data.content := "This match was found to be informative among genes; however, it is relatively common among taxon annotations.",
+          span(cls := "text-danger glyphicon glyphicon-flag"))))
   }
 
   private def formatExpect(expectScore: Double): String = if (expectScore < 0.01 && expectScore > -0.01) expectScore.formatted("%.1E") else expectScore.formatted("%.2f")
