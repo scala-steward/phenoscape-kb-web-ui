@@ -55,6 +55,16 @@ object Util {
 
   }
 
+  implicit class ObservableOps[X, Y](val self: Observable[(X, Y)]) extends AnyVal {
+
+    def unzip: (Observable[X], Observable[Y]) = {
+      val x = self.map(_._1)
+      val y = self.map(_._2)
+      (x, y)
+    }
+
+  }
+
   def linkToTaxon(iri: IRI): String = s"#/taxon/${Vocab.compact(iri).id}"
 
   def linkToEntity(iri: IRI): String = s"#/entity/${Vocab.compact(iri).id}"
