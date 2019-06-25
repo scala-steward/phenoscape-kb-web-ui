@@ -4,6 +4,7 @@ import org.phenoscape.kb.ui.Model.Facet
 import org.phenoscape.kb.ui.Model.IRI
 import org.phenoscape.kb.ui.Model.TaxonAnnotation
 import org.phenoscape.kb.ui.Model.Term
+import org.phenoscape.kb.ui.Util.ObservableOps
 
 import outwatch.Sink
 import outwatch.dom._
@@ -201,7 +202,7 @@ object FacetPage extends Component {
       PublicationsTab -> s.publicationsPage,
       GenesTab -> s.genesPage,
       GeneAnnotationsTab -> s.geneAnnotationsPage)).distinctUntilChanged
-    val tableWithData = activeTab.combineLatestWith(querySpecObs, currentPagesObs)(dataTable(_, _, _, tablePageSize))
+    val (downloadURL, tableWithData) = activeTab.combineLatestWith(querySpecObs, currentPagesObs)(dataTable(_, _, _, tablePageSize)).unzip
     val entityCountFn = querySpecObs.map(spec => (spec.quality, spec.taxon, spec.publication, spec.includeParts, spec.includeHistoricalHomologs, spec.includeSerialHomologs)).distinctUntilChanged.combineLatestWith(activeTab) {
       case ((q, t, p, parts, hist, serial), tab) =>
         tab match {
@@ -345,7 +346,8 @@ object FacetPage extends Component {
             cls := "panel-heading",
             h4(cls := "panel-title", child <-- tableTitle)),
           div(
-            cls := "panel-body"),
+            cls := "panel-body",
+            a(href <-- downloadURL, target := "_blank", span(cls := "glyphicon glyphicon-download-alt"), " Download data as text")),
           child <-- tableWithData),
         div(hidden <-- activeTab.map(_ != TaxaTab), Views.pagination(obsTaxonPage, store.redirectMap(SetPage(TaxaTab, _)), taxaTotalPagesObs.map(_.getOrElse(0)))),
         div(hidden <-- activeTab.map(_ != PhenotypesTab), Views.pagination(obsPhenotypesPage, store.redirectMap(SetPage(PhenotypesTab, _)), phenotypesTotalPagesObs.map(_.getOrElse(0)))),
@@ -354,22 +356,26 @@ object FacetPage extends Component {
         div(hidden <-- activeTab.map(_ != GenesTab), Views.pagination(obsGenePage, store.redirectMap(SetPage(GenesTab, _)), genesTotalPagesObs.map(_.getOrElse(0))))))
   }
 
-  private def dataTable(tab: FacetTab, querySpec: QuerySpec, currentPages: Map[FacetTab, Int], tableSize: Int): VNode = {
+  private def dataTable(tab: FacetTab, querySpec: QuerySpec, currentPages: Map[FacetTab, Int], tableSize: Int): (String, VNode) = {
     val QuerySpec(entity, quality, taxon, publication, parts, hist, serial) = querySpec
 
     def offset(page: Int) = tableSize * (page - 1).max(0)
 
-    val (header, rows) = tab match {
+    val (url, header, rows) = tab match {
       case PhenotypesTab       =>
+        val url = KBAPI.queryTaxonPhenotypesURL(entity, quality, taxon, publication, parts, hist, serial, 0, 0)
         val data = KBAPI.queryTaxonPhenotypes(entity, quality, taxon, publication, parts, hist, serial, tableSize, offset(currentPages(PhenotypesTab))).startWith(Nil)
         (
+          url,
           thead(tr(th("Phenotype"))),
           tbody(
             cls := "striped",
             children <-- data.map(_.map(singleTermRow))))
       case TaxaTab             =>
+        val url = KBAPI.queryTaxaWithPhenotypeURL(entity, quality, taxon, publication, parts, hist, serial, 0, 0)
         val data = KBAPI.queryTaxaWithPhenotype(entity, quality, taxon, publication, parts, hist, serial, tableSize, offset(currentPages(TaxaTab))).startWith(Nil)
         (
+          url,
           thead(tr(
             th("Group"),
             th("Taxon"))),
@@ -377,8 +383,10 @@ object FacetPage extends Component {
             cls := "striped",
             children <-- data.map(_.map(taxonRow))))
       case TaxonAnnotationsTab =>
+        val url = KBAPI.queryTaxonAnnotationsURL(entity, quality, taxon, publication, parts, hist, serial, 0, 0)
         val data = KBAPI.queryTaxonAnnotations(entity, quality, taxon, publication, parts, hist, serial, tableSize, offset(currentPages(TaxonAnnotationsTab))).startWith(Nil)
         (
+          url,
           thead(tr(
             th("Group"),
             th("Taxon"),
@@ -388,16 +396,20 @@ object FacetPage extends Component {
             cls := "sibling-striped",
             children <-- data.map(_.flatMap(taxonAnnotationRow))))
       case PublicationsTab     =>
+        val url = KBAPI.queryStudiesWithPhenotypeURL(entity, quality, taxon, publication, parts, hist, serial, 0, 0)
         val data = KBAPI.queryStudiesWithPhenotype(entity, quality, taxon, publication, parts, hist, serial, tableSize, offset(currentPages(PublicationsTab))).startWith(Nil)
         (
+          url,
           thead(tr(
             th("Publication"))),
           tbody(
             cls := "striped",
             children <-- data.map(_.map(publicationRow))))
       case GenesTab            =>
+        val url = KBAPI.queryGenesWithPhenotypeURL(entity, quality, parts, hist, serial, 0, 0)
         val data = KBAPI.queryGenesWithPhenotype(entity, quality, parts, hist, serial, tableSize, offset(currentPages(GenesTab))).startWith(Nil)
         (
+          url,
           thead(tr(
             th("Organism"),
             th("Gene"))),
@@ -406,8 +418,7 @@ object FacetPage extends Component {
             children <-- data.map(_.map(geneRow))))
       case GeneAnnotationsTab  => ???
     }
-    table(
-      cls := "table table-condensed", header, rows)
+    url -> table(cls := "table table-condensed", header, rows)
   }
 
   private def singleTermRow(term: Term): VNode = {
