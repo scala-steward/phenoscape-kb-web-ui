@@ -66,12 +66,12 @@ object Home extends Component {
         div(
           cls := "col-sm-4",
           panel("Analyis Tools", "primary")(
-            h4(a(href := "#/facet", "Faceted Browsing")),
+            h4(a(href := "#/facet", "Browse Data")),
             p("Browse phenotype annotations in the KB by anatomy and taxonomy."),
             h4(a(href := "#/ontotrace", "OntoTrace")),
             p("Export a synthetic character matrix of inferred knowledge about presence/absence of anatomical structures."),
             h4("Semantic Similarity"),
-            p("Find ", a(href := "#/similarity/gene", "evolutionary variation similar to genetic phenotypes"), ", or ", a(href := "#/similarity/taxon", "taxonomic variation similar to the phenotypic profile of a gene"), ".")
+            p("Find ", a(href := "#/similarity/gene", "taxonomic variation similar to the phenotypic profile of a gene"), ", or ", a(href := "#/similarity/taxon", "developmental genetic phenotypes similar to variation within a taxon"), ".")
           )
         )
       )
