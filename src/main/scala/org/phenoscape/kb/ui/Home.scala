@@ -51,7 +51,7 @@ object Home extends Component {
             div(
               cls := "col-sm-6",
               panel("Software and Data")(
-                h5(a(href := "http://rphenoscape.phenoscape.org", "RPhenoscape")),
+                h5(a(href := "https://rphenoscape.phenoscape.org", "RPhenoscape")),
                 p("This package facilitates interfacing with the Phenoscape Knowledgebase for searching ontology terms, retrieving term info, and querying data matrices."),
                 h5(a(href := "https://kb.phenoscape.org/apidocs/#/", "Web service API")),
                 p("This website is built on our publicly accessible web service APIs. Service documentation and automatically generated code examples are available at the link above."),
