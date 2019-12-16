@@ -65,7 +65,7 @@ object Home extends Component {
         ),
         div(
           cls := "col-sm-4",
-          panel("Analyis Tools", "primary")(
+          panel("Analysis Tools", "primary")(
             h4(a(href := "#/facet", "Browse Data")),
             p("Browse phenotype annotations in the KB by anatomy and taxonomy."),
             h4(a(href := "#/ontotrace", "OntoTrace")),
