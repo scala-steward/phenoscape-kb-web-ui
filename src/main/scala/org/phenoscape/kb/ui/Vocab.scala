@@ -28,7 +28,8 @@ object Vocab {
     "ncbigene" -> "http://www.ncbi.nlm.nih.gov/gene/",
     "DOI" -> "http://dx.doi.org/",
     "HDL" -> "http://hdl.handle.net/",
-    "JSTOR" -> "http://www.jstor.org/stable/")
+    "JSTOR" -> "http://www.jstor.org/stable/",
+    "ps" -> "http://purl.org/phenoscape/vocab.owl#")
 
   val synonymTypes: Map[IRI, String] = Map(
     IRI("http://www.geneontology.org/formats/oboInOwl#hasExactSynonym") -> "exact",
