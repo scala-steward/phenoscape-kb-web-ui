@@ -160,12 +160,12 @@ object FacetPage extends Component {
     val obsPublicationsPage = store.map(_.publicationsPage).distinctUntilChanged
     val obsGenePage = store.map(_.genesPage).distinctUntilChanged
     val tableTitle = activeTab.map {
-      case PhenotypesTab       => "Phenotypes"
-      case TaxonAnnotationsTab => "Taxon annotations"
-      case TaxaTab             => "Taxa with phenotype"
-      case GeneAnnotationsTab  => "Gene annotations"
-      case GenesTab            => "Genes"
-      case PublicationsTab     => "Publications"
+      case PhenotypesTab       => span("A feature of an organism and its quality, annotated with ontology terms")
+      case TaxonAnnotationsTab => span("Associations of a phenotype with a taxon")
+      case TaxaTab             => span("Taxa associated with phenotypes in the KB")
+      case GeneAnnotationsTab  => span("Associations of a phenotype with a gene")
+      case GenesTab            => span("Genes associated with phenotypes in the KB")
+      case PublicationsTab     => span("Studies that have been annotated in the KB")
     }
 
     def totalToPages(num: Int): Int = (num / tablePageSize.toDouble).ceil.toInt
