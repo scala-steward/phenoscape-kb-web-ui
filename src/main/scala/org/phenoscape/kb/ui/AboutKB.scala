@@ -55,14 +55,14 @@ object AboutKB extends Component {
         p("Logical relationships expressed in ontologies tie together everything in the Knowledgebase and drive functionality. The KB includes and builds on these community-developed ontologies:"),
         ul(
           li(a(href := "http://uberon.org", "Uberon ontology of metazoan anatomy")),
-          li(a(href := "http://wiki.obofoundry.org/wiki/index.php/PATO:Main_Page", "Phenotype and trait ontology (PATO)")),
-          li(a(href := "https://code.google.com/p/biological-spatial-ontology/", "Biospatial ontology (BSPO)")),
-          li(a(href := "http://zfin.org/zf_info/anatomy/dict/sum.html", "Zebrafish anatomy (ZFA)")),
+          li(a(href := "http://wiki.obofoundry.org/ontology/pato.html", "Phenotype and trait ontology (PATO)")),
+          li(a(href := "http://wiki.obofoundry.org/ontology/bspo.html", "Biospatial ontology (BSPO)")),
+          li(a(href := "http://zfin.org/action/ontology/search", "Zebrafish anatomy (ZFA)")),
           li(a(href := "http://www.xenbase.org/anatomy/xao.do?method=display", "Xenopus anatomy (XAO)")),
           li(a(href := "http://emouseatlas.org/emap/home.html", "Mouse developmental anatomy (EMAPA)")),
           li(a(href := "http://www.informatics.jax.org/searches/MP_form.shtml", "Mammalian phenotype ontology (MP)")),
           li(a(href := "http://www.human-phenotype-ontology.org/", "Human phenotype ontology (HP)")),
-          li(a(href := "https://code.google.com/p/obo-relations/", "OBO relations ontology (RO)")),
+          li(a(href := "https://github.com/oborel/obo-relations", "OBO relations ontology (RO)")),
           li(a(href := "http://www.geneontology.org/", "Gene ontology (GO)")))),
       div(
         h3("Software"),
