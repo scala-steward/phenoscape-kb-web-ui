@@ -15,7 +15,7 @@ lazy val parentProject = project.in(file("."))
   .settings(commonSettings)
   .settings(
     name := "phenoscape-kb-ui-project",
-    skip in publish := true)
+    (publish / skip) := true)
   .aggregate(
     webUI,
     webServer
@@ -53,7 +53,7 @@ lazy val webServer = project.in(file("server"))
         "dev.zio" %% "zio-interop-cats" % "2.5.1.0",
         "org.http4s" %% "http4s-blaze-server" % http4sVersion,
         "org.http4s" %% "http4s-dsl" % http4sVersion,
-        "com.outr" %% "scribe-slf4j" % "3.5.5"
+        "com.outr" %% "scribe-slf4j" % "3.6.10"
       )
     }
   )
