@@ -34,8 +34,8 @@ lazy val webUI = project.in(file("ui"))
         "io.circe" %%% "circe-core" % "0.13.0",
         "io.circe" %%% "circe-generic" % "0.13.0",
         "io.circe" %%% "circe-parser" % "0.13.0",
-        "com.softwaremill.sttp.client3" %%% "core" % "3.1.7",
-        "com.softwaremill.sttp.client3" %%% "circe" % "3.1.7"
+        "com.softwaremill.sttp.client3" %%% "core" % "3.1.9",
+        "com.softwaremill.sttp.client3" %%% "circe" % "3.1.9"
       )
     }
   )
