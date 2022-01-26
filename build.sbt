@@ -42,7 +42,9 @@ lazy val webUI = project.in(file("ui"))
   )
 
 lazy val webServer = project.in(file("server"))
+  .enablePlugins(JavaAppPackaging, DockerPlugin)
   .settings(commonSettings)
+  .settings(dockerSettings)
   .settings(
     name := "phenoscape-kb-ui-server",
     libraryDependencies ++= {
@@ -55,6 +57,12 @@ lazy val webServer = project.in(file("server"))
       )
     }
   )
+
+lazy val dockerSettings = Seq(
+  Docker / packageName := "phenoscape-kb-web-ui",
+  dockerUsername := Some("phenoscape"),
+  dockerExposedPorts := Seq(8080)
+)
 
 val jsPath = "server/src/main/resources/js"
 

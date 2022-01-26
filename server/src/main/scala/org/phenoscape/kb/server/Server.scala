@@ -14,6 +14,8 @@ import zio.interop.catz.implicits._
 
 object Server extends App {
 
+  val KBEndpoint: String = sys.env.getOrElse("KB_ENDPOINT", "https://kb.phenoscape.org/api/v2-beta")
+
   private val dsl = Http4sDsl[Task]
 
   import dsl._
@@ -43,25 +45,27 @@ object Server extends App {
     for {
       blocker <- getBlocker
     } yield of[Task] {
+      case request @ GET -> Root / "js" / path if path == "conf.js"                                                    =>
+        Ok(s"var KB_ENDPOINT = '$KBEndpoint';")
       case request @ GET -> Root / "js" / path if List(".js", ".css", ".map", ".html", ".webm").exists(path.endsWith)  =>
         StaticFile.fromResource[Task]("/js/" + path, blocker, Some(request))
           .getOrElseF(NotFound())
       case request @ HEAD -> Root / "js" / path if List(".js", ".css", ".map", ".html", ".webm").exists(path.endsWith) =>
         StaticFile.fromResource[Task]("/js/" + path, blocker, Some(request))
           .getOrElseF(NotFound())
-      case request @ GET -> Root / "css" / path if List(".css").exists(path.endsWith)  =>
+      case request @ GET -> Root / "css" / path if List(".css").exists(path.endsWith)                                  =>
         StaticFile.fromResource[Task]("/css/" + path, blocker, Some(request))
           .getOrElseF(NotFound())
-      case request @ HEAD -> Root / "css" / path if List(".css").exists(path.endsWith) =>
+      case request @ HEAD -> Root / "css" / path if List(".css").exists(path.endsWith)                                 =>
         StaticFile.fromResource[Task]("/css/" + path, blocker, Some(request))
           .getOrElseF(NotFound())
-      case request @ GET -> Root / "img" / path if List(".gif", ".png").exists(path.endsWith)  =>
+      case request @ GET -> Root / "img" / path if List(".gif", ".png").exists(path.endsWith)                          =>
         StaticFile.fromResource[Task]("/img/" + path, blocker, Some(request))
           .getOrElseF(NotFound())
-      case request @ HEAD -> Root / "img" / path if List(".gif", ".png").exists(path.endsWith) =>
+      case request @ HEAD -> Root / "img" / path if List(".gif", ".png").exists(path.endsWith)                         =>
         StaticFile.fromResource[Task]("/img/" + path, blocker, Some(request))
           .getOrElseF(NotFound())
-      case request @ GET -> path                                                                               =>
+      case request @ GET -> path                                                                                       =>
         println(path)
         StaticFile.fromResource[Task]("/index.html", blocker, Some(request))
           .getOrElseF(NotFound())

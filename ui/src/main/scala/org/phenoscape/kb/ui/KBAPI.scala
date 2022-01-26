@@ -7,19 +7,25 @@ import org.phenoscape.kb.ui.Model._
 import sttp.client3._
 import sttp.client3.circe._
 import sttp.model.Uri
-import scala.concurrent.duration._
 
+import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.scalajs.js
+import scala.scalajs.js.annotation.JSGlobalScope
 
 object KBAPI {
+
+  @js.native
+  @JSGlobalScope
+  object Conf extends js.Object {
+    var KB_ENDPOINT: String = js.native
+  }
+
+  val api: String = Conf.KB_ENDPOINT
 
   private val backend = FetchBackend()
 
   private final case class Total(total: Int)
-
-  val api: String = "https://kb.phenoscape.org/api/v2-beta"
-
-  //val api: String = "http://localhost:8082"
 
   def termLabel(iri: IRI): EventStream[Term] = get[Term](uri"$api/term/label?iri=${iri.id}")
 
