@@ -29,7 +29,7 @@ lazy val webUI = project.in(file("ui"))
     scalaJSUseMainModuleInitializer := true,
     libraryDependencies ++= {
       Seq(
-        "com.raquo" %%% "laminar" % "0.12.2",
+        "com.raquo" %%% "laminar" % "0.14.2",
         "com.raquo" %%% "waypoint" % "0.3.0",
         "com.lihaoyi" %%% "upickle" % "1.4.4",
         "io.circe" %%% "circe-core" % circeVersion,
