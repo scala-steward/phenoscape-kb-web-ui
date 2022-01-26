@@ -4,12 +4,12 @@ import com.raquo.airstream.core.EventStream
 import io.circe.Decoder
 import io.circe.generic.auto._
 import org.phenoscape.kb.ui.Model._
+import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 import sttp.client3._
 import sttp.client3.circe._
 import sttp.model.Uri
 
 import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobalScope
 

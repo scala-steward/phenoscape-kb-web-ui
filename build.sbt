@@ -36,7 +36,8 @@ lazy val webUI = project.in(file("ui"))
         "io.circe" %%% "circe-generic" % circeVersion,
         "io.circe" %%% "circe-parser" % circeVersion,
         "com.softwaremill.sttp.client3" %%% "core" % sttpClientVersion,
-        "com.softwaremill.sttp.client3" %%% "circe" % sttpClientVersion
+        "com.softwaremill.sttp.client3" %%% "circe" % sttpClientVersion,
+        "org.scala-js" %%% "scala-js-macrotask-executor" % "1.0.0"
       )
     }
   )
