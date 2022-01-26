@@ -1,7 +1,7 @@
 package org.phenoscape.kb.ui.components
 
 import com.raquo.laminar.api.L._
-import org.scalajs.dom.raw.Element
+import org.scalajs.dom.Element
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobalScope
