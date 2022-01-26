@@ -1,6 +1,6 @@
 val zioVersion = "1.0.13"
 val http4sVersion = "0.21.31"
-val circeVersion = "0.13.0"
+val circeVersion = "0.14.1"
 val sttpClientVersion = "3.1.9"
 
 lazy val commonSettings = Seq(
@@ -31,7 +31,7 @@ lazy val webUI = project.in(file("ui"))
       Seq(
         "com.raquo" %%% "laminar" % "0.12.2",
         "com.raquo" %%% "waypoint" % "0.3.0",
-        "com.lihaoyi" %%% "upickle" % "1.2.3",
+        "com.lihaoyi" %%% "upickle" % "1.4.4",
         "io.circe" %%% "circe-core" % circeVersion,
         "io.circe" %%% "circe-generic" % circeVersion,
         "io.circe" %%% "circe-parser" % circeVersion,
