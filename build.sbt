@@ -1,7 +1,7 @@
 val zioVersion = "1.0.13"
 val http4sVersion = "0.21.31"
 val circeVersion = "0.14.1"
-val sttpClientVersion = "3.1.9"
+val sttpClientVersion = "3.4.1"
 
 lazy val commonSettings = Seq(
   organization := "org.phenoscape",
@@ -29,8 +29,8 @@ lazy val webUI = project.in(file("ui"))
     scalaJSUseMainModuleInitializer := true,
     libraryDependencies ++= {
       Seq(
-        "com.raquo" %%% "laminar" % "0.12.2",
-        "com.raquo" %%% "waypoint" % "0.3.0",
+        "com.raquo" %%% "laminar" % "0.14.2",
+        "com.raquo" %%% "waypoint" % "0.5.0",
         "com.lihaoyi" %%% "upickle" % "1.4.4",
         "io.circe" %%% "circe-core" % circeVersion,
         "io.circe" %%% "circe-generic" % circeVersion,
