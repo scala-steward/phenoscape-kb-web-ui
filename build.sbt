@@ -1,7 +1,7 @@
 val zioVersion = "1.0.13"
 val http4sVersion = "0.21.31"
 val circeVersion = "0.14.1"
-val sttpClientVersion = "3.1.7"
+val sttpClientVersion = "3.1.9"
 
 lazy val commonSettings = Seq(
   organization := "org.phenoscape",
