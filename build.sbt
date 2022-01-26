@@ -1,12 +1,13 @@
-val zioVersion = "1.0.3"
-val http4sVersion = "0.21.13"
-val circeVersion = "0.13.0"
+val zioVersion = "1.0.13"
+val http4sVersion = "0.21.31"
+val circeVersion = "0.14.1"
+val sttpClientVersion = "3.1.7"
 
 lazy val commonSettings = Seq(
   organization := "org.phenoscape",
   version := "0.2",
   licenses := Seq("MIT license" -> url("https://opensource.org/licenses/MIT")),
-  scalaVersion := "2.13.5",
+  scalaVersion := "2.13.7",
   scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8", "-Ypatmat-exhaust-depth", "off")
 )
 
@@ -28,14 +29,14 @@ lazy val webUI = project.in(file("ui"))
     scalaJSUseMainModuleInitializer := true,
     libraryDependencies ++= {
       Seq(
-        "com.raquo" %%% "laminar" % "0.12.0",
+        "com.raquo" %%% "laminar" % "0.12.2",
         "com.raquo" %%% "waypoint" % "0.3.0",
         "com.lihaoyi" %%% "upickle" % "1.2.3",
-        "io.circe" %%% "circe-core" % "0.14.1",
-        "io.circe" %%% "circe-generic" % "0.14.1",
-        "io.circe" %%% "circe-parser" % "0.14.1",
-        "com.softwaremill.sttp.client3" %%% "core" % "3.1.7",
-        "com.softwaremill.sttp.client3" %%% "circe" % "3.1.7"
+        "io.circe" %%% "circe-core" % circeVersion,
+        "io.circe" %%% "circe-generic" % circeVersion,
+        "io.circe" %%% "circe-parser" % circeVersion,
+        "com.softwaremill.sttp.client3" %%% "core" % sttpClientVersion,
+        "com.softwaremill.sttp.client3" %%% "circe" % sttpClientVersion
       )
     }
   )
@@ -47,10 +48,10 @@ lazy val webServer = project.in(file("server"))
     libraryDependencies ++= {
       Seq(
         "dev.zio" %% "zio" % zioVersion,
-        "dev.zio" %% "zio-interop-cats" % "2.2.0.1",
+        "dev.zio" %% "zio-interop-cats" % "2.5.1.0",
         "org.http4s" %% "http4s-blaze-server" % http4sVersion,
         "org.http4s" %% "http4s-dsl" % http4sVersion,
-        "com.outr" %% "scribe-slf4j" % "3.5.0"
+        "com.outr" %% "scribe-slf4j" % "3.5.5"
       )
     }
   )
