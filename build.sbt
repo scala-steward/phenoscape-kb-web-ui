@@ -88,3 +88,4 @@ fullOptCompileCopy := {
 
 addCommandAlias("runDev", ";fastOptCompileCopy; webServer/reStart")
 addCommandAlias("runProd", ";fullOptCompileCopy; webServer/reStart")
+addCommandAlias("publishDocker", ";fullOptCompileCopy; webServer/docker:publish")
