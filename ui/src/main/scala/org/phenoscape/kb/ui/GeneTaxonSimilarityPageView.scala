@@ -135,7 +135,7 @@ object GeneTaxonSimilarityPageView {
                       cls := "col-sm-9",
                       p(
                         cls := "form-control-static",
-                        span(child.text <-- $selectedMatch.map(_.map(sm => sm.medianScore.formatted("%.2f")).getOrElse("")))))),
+                        span(child.text <-- $selectedMatch.map(_.map(sm => f"${sm.medianScore}%.2f").getOrElse("")))))),
                   div(
                     cls := "form-group",
                     label(cls := "col-sm-3 control-label", "Expect score:"),
@@ -196,9 +196,9 @@ object GeneTaxonSimilarityPageView {
             label(forId := "mica", "Most Informative Common Ancestor"),
             p(name := "mica", cls := "form-control-static", span(title := annotationMatch.bestSubsumer.term.iri.id, annotationMatch.bestSubsumer.term.label)),
             label(forId := "mica", "Information Content"),
-            p(name := "mica", cls := "form-control-static", span(annotationMatch.bestSubsumer.ic.formatted("%.2f")))
+            p(name := "mica", cls := "form-control-static", span(f"${annotationMatch.bestSubsumer.ic}%.2f"))
           ),
-          annotationMatch.bestSubsumer.ic.formatted("%.2f")), "\u00A0",
+          f"${annotationMatch.bestSubsumer.ic}.2f"), "\u00A0",
         span(hidden := annotationMatch.bestSubsumer.disparity <= 0.25,
           styleAttr := "white-space: nowrap;",
           popup := "This match was found to be informative among genes; however, it is relatively common among taxon annotations.",
@@ -208,6 +208,6 @@ object GeneTaxonSimilarityPageView {
     )
   }
 
-  private def formatExpect(expectScore: Double): String = if (expectScore < 0.01 && expectScore > -0.01) expectScore.formatted("%.1E") else expectScore.formatted("%.2f")
+  private def formatExpect(expectScore: Double): String = if (expectScore < 0.01 && expectScore > -0.01) f"$expectScore%.1E" else f"$expectScore%.2f"
 
 }
