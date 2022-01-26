@@ -31,9 +31,9 @@ lazy val webUI = project.in(file("ui"))
         "com.raquo" %%% "laminar" % "0.12.0",
         "com.raquo" %%% "waypoint" % "0.3.0",
         "com.lihaoyi" %%% "upickle" % "1.2.3",
-        "io.circe" %%% "circe-core" % "0.13.0",
-        "io.circe" %%% "circe-generic" % "0.13.0",
-        "io.circe" %%% "circe-parser" % "0.13.0",
+        "io.circe" %%% "circe-core" % "0.14.1",
+        "io.circe" %%% "circe-generic" % "0.14.1",
+        "io.circe" %%% "circe-parser" % "0.14.1",
         "com.softwaremill.sttp.client3" %%% "core" % "3.1.7",
         "com.softwaremill.sttp.client3" %%% "circe" % "3.1.7"
       )
