@@ -15,7 +15,7 @@ lazy val parentProject = project.in(file("."))
   .settings(commonSettings)
   .settings(
     name := "phenoscape-kb-ui-project",
-    skip in publish := true)
+    (publish / skip) := true)
   .aggregate(
     webUI,
     webServer
