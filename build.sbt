@@ -1,4 +1,4 @@
-val zioVersion = "1.0.3"
+val zioVersion = "1.0.13"
 val http4sVersion = "0.21.13"
 val circeVersion = "0.13.0"
 
