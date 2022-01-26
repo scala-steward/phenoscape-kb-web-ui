@@ -1,12 +1,13 @@
 val zioVersion = "1.0.13"
 val http4sVersion = "0.21.31"
 val circeVersion = "0.13.0"
+val sttpClientVersion = "3.1.7"
 
 lazy val commonSettings = Seq(
   organization := "org.phenoscape",
   version := "0.2",
   licenses := Seq("MIT license" -> url("https://opensource.org/licenses/MIT")),
-  scalaVersion := "2.13.5",
+  scalaVersion := "2.13.7",
   scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8", "-Ypatmat-exhaust-depth", "off")
 )
 
@@ -31,11 +32,11 @@ lazy val webUI = project.in(file("ui"))
         "com.raquo" %%% "laminar" % "0.12.0",
         "com.raquo" %%% "waypoint" % "0.3.0",
         "com.lihaoyi" %%% "upickle" % "1.2.3",
-        "io.circe" %%% "circe-core" % "0.13.0",
-        "io.circe" %%% "circe-generic" % "0.13.0",
-        "io.circe" %%% "circe-parser" % "0.13.0",
-        "com.softwaremill.sttp.client3" %%% "core" % "3.1.7",
-        "com.softwaremill.sttp.client3" %%% "circe" % "3.1.7"
+        "io.circe" %%% "circe-core" % circeVersion,
+        "io.circe" %%% "circe-generic" % circeVersion,
+        "io.circe" %%% "circe-parser" % circeVersion,
+        "com.softwaremill.sttp.client3" %%% "core" % sttpClientVersion,
+        "com.softwaremill.sttp.client3" %%% "circe" % sttpClientVersion
       )
     }
   )
