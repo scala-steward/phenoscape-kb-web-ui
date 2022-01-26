@@ -29,7 +29,7 @@ lazy val webUI = project.in(file("ui"))
     libraryDependencies ++= {
       Seq(
         "com.raquo" %%% "laminar" % "0.12.0",
-        "com.raquo" %%% "waypoint" % "0.3.0",
+        "com.raquo" %%% "waypoint" % "0.5.0",
         "com.lihaoyi" %%% "upickle" % "1.2.3",
         "io.circe" %%% "circe-core" % "0.13.0",
         "io.circe" %%% "circe-generic" % "0.13.0",
