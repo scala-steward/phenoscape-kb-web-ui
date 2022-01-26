@@ -7,7 +7,7 @@ object AboutPageView {
 
   def view(updates: WriteBus[Page]): HtmlElement = {
     val $data = KBAPI.kbInfo
-    val dateString = $data.map(_.buildDate.toLocaleDateString)
+    val dateString = $data.map(_.buildDate.toLocaleDateString())
     div(
       h2("About the Knowledgebase"),
       p("Data and ontologies in the KB were last updated on ", strong(child.text <-- dateString), "."),
