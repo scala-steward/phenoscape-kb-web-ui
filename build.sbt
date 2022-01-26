@@ -1,5 +1,5 @@
 val zioVersion = "1.0.13"
-val http4sVersion = "0.21.13"
+val http4sVersion = "0.21.31"
 val circeVersion = "0.13.0"
 
 lazy val commonSettings = Seq(
