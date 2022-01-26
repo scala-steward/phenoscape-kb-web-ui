@@ -48,7 +48,7 @@ lazy val webServer = project.in(file("server"))
     libraryDependencies ++= {
       Seq(
         "dev.zio" %% "zio" % zioVersion,
-        "dev.zio" %% "zio-interop-cats" % "2.5.1.0",
+        "dev.zio" %% "zio-interop-cats" % "3.2.9.0",
         "org.http4s" %% "http4s-blaze-server" % http4sVersion,
         "org.http4s" %% "http4s-dsl" % http4sVersion,
         "com.outr" %% "scribe-slf4j" % "3.5.5"
