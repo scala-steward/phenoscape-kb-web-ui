@@ -50,7 +50,7 @@ lazy val webServer = project.in(file("server"))
         "dev.zio" %% "zio-interop-cats" % "2.2.0.1",
         "org.http4s" %% "http4s-blaze-server" % http4sVersion,
         "org.http4s" %% "http4s-dsl" % http4sVersion,
-        "com.outr" %% "scribe-slf4j" % "3.5.0"
+        "com.outr" %% "scribe-slf4j" % "3.5.5"
       )
     }
   )
