@@ -27,7 +27,7 @@ object Server extends App {
       for {
         routes <- getRoutes
         serve <- BlazeServerBuilder[Task](runtime.platform.executor.asEC)
-          .bindHttp(8080)
+          .bindHttp(8080, "0.0.0.0")
           .withHttpApp(Router("/" -> routes).orNotFound)
           .serve
           .compile
