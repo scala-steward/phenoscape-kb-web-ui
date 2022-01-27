@@ -5,7 +5,7 @@ val sttpClientVersion = "3.4.1"
 
 lazy val commonSettings = Seq(
   organization := "org.phenoscape",
-  version := "0.2",
+  version := "0.2.1",
   licenses := Seq("MIT license" -> url("https://opensource.org/licenses/MIT")),
   scalaVersion := "2.13.7",
   scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8", "-Ypatmat-exhaust-depth", "off")
