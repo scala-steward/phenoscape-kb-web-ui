@@ -31,7 +31,7 @@ lazy val webUI = project.in(file("ui"))
       Seq(
         "com.raquo" %%% "laminar" % "0.14.2",
         "com.raquo" %%% "waypoint" % "0.5.0",
-        "com.lihaoyi" %%% "upickle" % "1.4.4",
+        "com.lihaoyi" %%% "upickle" % "1.5.0",
         "io.circe" %%% "circe-core" % circeVersion,
         "io.circe" %%% "circe-generic" % circeVersion,
         "io.circe" %%% "circe-parser" % circeVersion,
