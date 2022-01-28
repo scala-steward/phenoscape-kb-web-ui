@@ -11,21 +11,53 @@ import urldsl.vocabulary.{FromString, Printer}
 
 object App {
 
-  sealed trait Page
+  sealed trait Page {
 
-  case object HomePage extends Page
+    def title: String
 
-  case object AboutPage extends Page
+  }
 
-  case object OntoTracePage extends Page
+  case object HomePage extends Page {
 
-  final case class NotFoundPage(path: List[String]) extends Page
+    val title: String = "Phenoscape Knowledgebase"
 
-  final case class EntityPage(iri: IRI) extends Page
+  }
 
-  final case class TaxonPage(iri: IRI) extends Page
+  case object AboutPage extends Page {
 
-  final case class GenePage(iri: IRI) extends Page
+    val title: String = "Phenoscape Knowledgebase: About"
+
+  }
+
+  case object OntoTracePage extends Page {
+
+    val title: String = "Phenoscape Knowledgebase: OntoTrace"
+
+  }
+
+  final case class NotFoundPage(path: List[String]) extends Page {
+
+    val title: String = "Phenoscape Knowledgebase: Page Not Found"
+
+  }
+
+  final case class EntityPage(iri: IRI) extends Page {
+
+    val title: String = s"Phenoscape Knowledgebase: Entity ${Vocab.compact(iri).id}"
+
+  }
+
+  final case class TaxonPage(iri: IRI) extends Page {
+
+    val title: String = s"Phenoscape Knowledgebase: Taxon ${Vocab.compact(iri).id}"
+
+  }
+
+  final case class GenePage(iri: IRI) extends Page {
+
+    val title: String = s"Phenoscape Knowledgebase: Gene ${Vocab.compact(iri).id}"
+
+  }
 
   sealed trait FacetTab {
     def key: String
@@ -122,6 +154,8 @@ object App {
                               geneAnnotationsPage: Int = 1,
                               publicationsPage: Int = 1) extends Page {
 
+    val title: String = s"Phenoscape Knowledgebase: Browse Data"
+
     def currentQuerySpec: QuerySpec = {
       val quality = qualityMode match {
         case PhenotypicQuality => selectedQualityPath.headOption
@@ -139,9 +173,17 @@ object App {
 
   }
 
-  case class TaxonGeneSimilarityPage(taxonIRIOpt: Option[IRI] = None, selectedPage: Option[Int] = None, selectedMatch: Option[SimilarityMatch] = None) extends Page
+  case class TaxonGeneSimilarityPage(taxonIRIOpt: Option[IRI] = None, selectedPage: Option[Int] = None, selectedMatch: Option[SimilarityMatch] = None) extends Page {
 
-  case class GeneTaxonSimilarityPage(geneIRIOpt: Option[IRI] = None, selectedPage: Option[Int] = None, selectedMatch: Option[SimilarityMatch] = None) extends Page
+    val title: String = s"Phenoscape Knowledgebase: Taxon to Gene Similarity Search"
+
+  }
+
+  case class GeneTaxonSimilarityPage(geneIRIOpt: Option[IRI] = None, selectedPage: Option[Int] = None, selectedMatch: Option[SimilarityMatch] = None) extends Page {
+
+    val title: String = s"Phenoscape Knowledgebase: Gene to Taxon Similarity Search"
+
+  }
 
   private implicit val IRIRW: ReadWriter[IRI] = macroRW
   private implicit val EntityPageRW: ReadWriter[EntityPage] = macroRW
@@ -250,7 +292,7 @@ object App {
 
   private val router = new Router[Page](
     routes = List(entityRoute, taxonRoute, facetRoute, taxonGeneSimilarityRoute, geneTaxonSimilarityRoute, aboutRoute, ontotraceRoute, homeRoute, notFoundRoute),
-    getPageTitle = _.toString, // mock page title (displayed in the browser tab next to favicon)
+    getPageTitle = _.title,
     serializePage = page => write(page)(rw), // serialize page data for storage in History API log
     deserializePage = pageStr => read(pageStr)(rw) // deserialize the above
   )(
