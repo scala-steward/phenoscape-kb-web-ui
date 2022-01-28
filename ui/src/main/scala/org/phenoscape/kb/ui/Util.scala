@@ -33,7 +33,10 @@ object Util {
 
   def taxonThumbnailIRI(phylopic: IRI): IRI = {
     val uuid = phylopic.id.replace("http://phylopic.org/image/", "").replace("/", "")
-    IRI(s"http://phylopic.org/assets/images/submissions/$uuid.64.png")
+    val phylopicURL = s"http://phylopic.org/assets/images/submissions/$uuid.64.png"
+    // Using the weserv.nl proxy allows using HTTPS
+    val proxyURL = s"https://images.weserv.nl/?url=$phylopicURL"
+    IRI(proxyURL)
   }
 
   //TODO KB services should provide model organism type in gene info
