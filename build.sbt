@@ -1,5 +1,6 @@
 val zioVersion = "1.0.13"
-val http4sVersion = "0.21.31"
+val zioCatsVersion = "3.2.9.0"
+val http4sVersion = "0.23.8"
 val circeVersion = "0.14.1"
 val sttpClientVersion = "3.4.1"
 
@@ -51,7 +52,7 @@ lazy val webServer = project.in(file("server"))
     libraryDependencies ++= {
       Seq(
         "dev.zio" %% "zio" % zioVersion,
-        "dev.zio" %% "zio-interop-cats" % "2.5.1.0",
+        "dev.zio" %% "zio-interop-cats" % zioCatsVersion,
         "org.http4s" %% "http4s-blaze-server" % http4sVersion,
         "org.http4s" %% "http4s-dsl" % http4sVersion,
         "com.outr" %% "scribe-slf4j" % "3.6.10"
