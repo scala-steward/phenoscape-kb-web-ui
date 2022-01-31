@@ -6,10 +6,8 @@ import io.circe.generic.auto._
 import org.phenoscape.kb.ui.Model._
 import org.scalajs.macrotaskexecutor.MacrotaskExecutor.Implicits._
 import sttp.client3._
-import sttp.client3.circe._
 import sttp.model.Uri
 
-import scala.concurrent.duration._
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobalScope
 
@@ -24,6 +22,7 @@ object KBAPI {
   val api: String = Conf.KB_ENDPOINT
 
   private val backend = FetchBackend()
+  private val throttler = new Throttler(100)
 
   private final case class Total(total: Int)
 
@@ -306,21 +305,7 @@ object KBAPI {
   def ontotraceURL(taxonExpression: String, entityExpression: String, includeParts: Boolean, variableOnly: Boolean): Uri =
     uri"$api/ontotrace?taxon=$taxonExpression&entity=$entityExpression&variable_only=$variableOnly&parts=$includeParts"
 
-  private def get[T](uri: Uri)(implicit evidence: Decoder[T]): EventStream[T] = {
-    val future = basicRequest
-      .header("Accept", "application/json")
-      .get(uri).response(asJson[T])
-      .readTimeout(5.minutes)
-      .send(backend).map { response =>
-      response.body match {
-        case Right(_)    => ()
-        case Left(error) => println(error.getMessage)
-          println(s"Failed decoding JSON response: ${response.body.toString.take(100)}...")
-      }
-      response.body
-    }.collect { case Right(value) => value }
-    EventStream.fromFuture(future, true)
-  }
+  private def get[T](uri: Uri)(implicit evidence: Decoder[T]): EventStream[T] = throttler.get(uri)
 
   private def <>(iri: IRI): String = s"<${iri.id}>"
 
