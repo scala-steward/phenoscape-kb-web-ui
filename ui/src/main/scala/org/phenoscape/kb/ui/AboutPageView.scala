@@ -12,33 +12,12 @@ object AboutPageView {
       h2("About the Knowledgebase"),
       p("Data and ontologies in the KB were last updated on ", strong(child.text <-- dateString), "."),
       div(
-        cls := "row",
-        div(
-          cls := "col-md-5 col-sm-6 col-xs-9",
-          div(
-            cls := "panel panel-default",
-            div(cls := "panel-heading", "Annotation stats"),
-            table(
-              cls := "table table-condensed",
-              tbody(
-                tr(
-                  cls := "text-right",
-                  td("Annotated matrices:"), td(child <-- $data.map(_.annotatedMatrices))),
-                tr(
-                  cls := "text-right",
-                  td("Annotated taxa:"), td(child <-- $data.map(_.annotatedTaxa))),
-                tr(
-                  cls := "text-right",
-                  td("Annotated characters:"), td(child <-- $data.map(_.annotatedCharacters))),
-                tr(
-                  cls := "text-right",
-                  td("Annotated character states:"), td(child <-- $data.map(_.annotatedStates)))))))),
-      div(
         h3("Data"),
         h4("Phenoscape-annotated evolutionary data"),
         p(a(href := "https://github.com/phenoscape/phenoscape-data", "Available at GitHub"), " in NeXML format."),
         p("A ", a(href := "http://kb.phenoscape.org/api/kb/annotation_report", "character annotation report"), " is available for all the NeXML data loaded into the KB."),
         h4("Model organism gene phenotypes and expression locations"),
+        p("Model organism data are imported via RDF datasets provided by the ", a(href := "https://monarchinitiative.org", "Monarch Initiative"), "."),
         ul(
           li(a(href := "http://zfin.org", "ZFIN"), " (zebrafish)"),
           li(a(href := "http://xenbase.org", "Xenbase"), " (frog)"),
