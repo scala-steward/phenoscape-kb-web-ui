@@ -32,7 +32,7 @@ class Throttler(val concurrent: Int) {
 
   }
 
-  private var queue: scala.collection.immutable.Queue[Request[_]] = Queue.empty
+  private var queue: Queue[Request[_]] = Queue.empty
   private var inFlight: Set[Future[_]] = Set.empty
 
   private def checkForDequeue(): Unit = {
