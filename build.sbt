@@ -1,5 +1,5 @@
 val zioVersion = "1.0.13"
-val zioCatsVersion = "3.2.9.0"
+val zioCatsVersion = "3.2.9.1"
 val http4sVersion = "0.23.10"
 val circeVersion = "0.14.1"
 val sttpClientVersion = "3.4.1"
