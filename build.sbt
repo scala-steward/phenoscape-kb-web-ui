@@ -1,8 +1,8 @@
-val zioVersion = "1.0.13"
+val zioVersion = "1.0.18"
 val zioCatsVersion = "3.2.9.0"
 val http4sVersion = "0.23.15"
 val circeVersion = "0.14.5"
-val sttpClientVersion = "3.4.1"
+val sttpClientVersion = "3.4.2"
 
 lazy val commonSettings = Seq(
   organization := "org.phenoscape",
@@ -38,7 +38,7 @@ lazy val webUI = project.in(file("ui"))
         "io.circe" %%% "circe-parser" % circeVersion,
         "com.softwaremill.sttp.client3" %%% "core" % sttpClientVersion,
         "com.softwaremill.sttp.client3" %%% "circe" % sttpClientVersion,
-        "org.scala-js" %%% "scala-js-macrotask-executor" % "1.0.0"
+        "org.scala-js" %%% "scala-js-macrotask-executor" % "1.1.1"
       )
     }
   )
@@ -55,7 +55,7 @@ lazy val webServer = project.in(file("server"))
         "dev.zio" %% "zio-interop-cats" % zioCatsVersion,
         "org.http4s" %% "http4s-blaze-server" % http4sVersion,
         "org.http4s" %% "http4s-dsl" % http4sVersion,
-        "com.outr" %% "scribe-slf4j" % "3.7.0"
+        "com.outr" %% "scribe-slf4j" % "3.7.1"
       )
     }
   )
