@@ -1,14 +1,14 @@
 val zioVersion = "1.0.13"
 val zioCatsVersion = "3.2.9.0"
-val http4sVersion = "0.23.10"
+val http4sVersion = "0.23.15"
 val circeVersion = "0.14.5"
 val sttpClientVersion = "3.4.1"
 
 lazy val commonSettings = Seq(
   organization := "org.phenoscape",
-  version := "0.2.3",
+  version := "0.2.4",
   licenses := Seq("MIT license" -> url("https://opensource.org/licenses/MIT")),
-  scalaVersion := "2.13.7",
+  scalaVersion := "2.13.11",
   scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8", "-Ypatmat-exhaust-depth", "off")
 )
 
