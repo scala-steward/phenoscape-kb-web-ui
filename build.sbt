@@ -6,7 +6,7 @@ val sttpClientVersion = "3.4.2"
 
 lazy val commonSettings = Seq(
   organization := "org.phenoscape",
-  version := "0.2.4",
+  version := "0.2.5",
   licenses := Seq("MIT license" -> url("https://opensource.org/licenses/MIT")),
   scalaVersion := "2.13.11",
   scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8", "-Ypatmat-exhaust-depth", "off")
@@ -63,7 +63,8 @@ lazy val webServer = project.in(file("server"))
 lazy val dockerSettings = Seq(
   Docker / packageName := "phenoscape-kb-web-ui",
   dockerUsername := Some("phenoscape"),
-  dockerExposedPorts := Seq(8080)
+  dockerExposedPorts := Seq(8080),
+  dockerBuildxPlatforms := Seq("linux/arm64/v8", "linux/amd64")
 )
 
 val jsPath = "server/src/main/resources/js"
